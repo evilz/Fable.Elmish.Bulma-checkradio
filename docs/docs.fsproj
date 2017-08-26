@@ -1,0 +1,36 @@
+<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Libs -->
+    <Compile Include="src/Libs/Fable.Import.Marked.fs" />
+    <Compile Include="src/Libs/Fable.Import.PrismJS.fs" />
+    <!-- Global to the app -->
+    <Compile Include="src/Global.fs" />
+    <Compile Include="src/Render.fs" />
+    <!-- Viewer -->
+    <Compile Include="src/Viewer/Types.fs" />
+    <Compile Include="src/Viewer/State.fs" />
+    <Compile Include="src/Viewer/View.fs" />
+    <!-- Elements -->
+        <Compile Include="src/Elements/Checkbox/Types.fs" />
+        <Compile Include="src/Elements/Checkbox/State.fs" />
+        <Compile Include="src/Elements/Checkbox/View.fs" />
+    <!-- End Elements -->
+    <!-- Home -->
+    <Compile Include="src/Home/Types.fs" />
+    <Compile Include="src/Home/State.fs" />
+    <Compile Include="src/Home/View.fs" />
+    <!-- Navbar -->
+    <Compile Include="src/Navbar/View.fs" />
+    <!-- App -->
+    <Compile Include="src/Types.fs" />
+    <Compile Include="src/State.fs" />
+    <Compile Include="src/App.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../src/Fable.Elmish.Bulma-checkradio.fsproj" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>
