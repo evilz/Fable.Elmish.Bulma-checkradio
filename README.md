@@ -1,0 +1,1 @@
+Fable.Elmish.Bulma-checkradio
