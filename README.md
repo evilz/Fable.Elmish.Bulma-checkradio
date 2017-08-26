@@ -1,7 +1,5 @@
-# Elmish.Bulma : Wrapper around Bulma.io
+# Elmish.Bulma-checkradio : Wrapper around Bulma.io
 
-[![Gitter](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/fable-compiler/Fable)
-[![NuGet version](https://badge.fury.io/nu/Fable.Elmish.Bulma.svg)](https://badge.fury.io/nu/Fable.Elmish.Bulma)
 
 ## Supported version
 
