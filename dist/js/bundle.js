@@ -3038,7 +3038,7 @@ function setType(fullName, cons) {
     types.set(fullName, cons);
 }
 
-var FSymbol = {
+var _Symbol = {
     reflection: Symbol("reflection")
 };
 
@@ -3184,6 +3184,18 @@ var Unit = new NonDeclaredType("Unit");
 function Option(t) {
     return new NonDeclaredType("Option", null, [t]);
 }
+function FableArray(t) {
+    var isTypedArray = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+    var def = null;
+    var genArg = null;
+    if (isTypedArray) {
+        def = t;
+    } else {
+        genArg = t;
+    }
+    return new NonDeclaredType("Array", def, [genArg]);
+}
 function Tuple(types) {
     return new NonDeclaredType("Tuple", null, types);
 }
@@ -3207,9 +3219,9 @@ function makeGeneric(typeDef, genArgs) {
 
 function extendInfo(cons, info) {
     var parent = Object.getPrototypeOf(cons.prototype);
-    if (typeof parent[FSymbol.reflection] === "function") {
+    if (typeof parent[_Symbol.reflection] === "function") {
         var newInfo = {};
-        var parentInfo = parent[FSymbol.reflection]();
+        var parentInfo = parent[_Symbol.reflection]();
         Object.getOwnPropertyNames(info).forEach(function (k) {
             var i = info[k];
             if ((typeof i === "undefined" ? "undefined" : _typeof(i)) === "object") {
@@ -3225,8 +3237,8 @@ function extendInfo(cons, info) {
 function hasInterface(obj, interfaceName) {
     if (interfaceName === "System.Collections.Generic.IEnumerable") {
         return typeof obj[Symbol.iterator] === "function";
-    } else if (typeof obj[FSymbol.reflection] === "function") {
-        var interfaces = obj[FSymbol.reflection]().interfaces;
+    } else if (typeof obj[_Symbol.reflection] === "function") {
+        var interfaces = obj[_Symbol.reflection]().interfaces;
         return Array.isArray(interfaces) && interfaces.indexOf(interfaceName) > -1;
     }
     return false;
@@ -3242,7 +3254,7 @@ function getPropertyNames(obj) {
     if (obj == null) {
         return [];
     }
-    var propertyMap = typeof obj[FSymbol.reflection] === "function" ? obj[FSymbol.reflection]().properties || [] : obj;
+    var propertyMap = typeof obj[_Symbol.reflection] === "function" ? obj[_Symbol.reflection]().properties || [] : obj;
     return Object.getOwnPropertyNames(propertyMap);
 }
 
@@ -3262,7 +3274,7 @@ function toString(obj) {
         return obj.ToString();
     }
     if (hasInterface(obj, "FSharpUnion")) {
-        var info = obj[FSymbol.reflection]();
+        var info = obj[_Symbol.reflection]();
         var uci = info.cases[obj.tag];
         switch (uci.length) {
             case 1:
@@ -3498,8 +3510,8 @@ var CaseRules = {
 };
 function isList(o) {
     if (o != null) {
-        if (typeof o[FSymbol.reflection] === "function") {
-            return o[FSymbol.reflection]().type === "Microsoft.FSharp.Collections.FSharpList";
+        if (typeof o[_Symbol.reflection] === "function") {
+            return o[_Symbol.reflection]().type === "Microsoft.FSharp.Collections.FSharpList";
         }
     }
     return false;
@@ -3520,8 +3532,8 @@ function createObj(fields) {
             var proto = Object.getPrototypeOf(value);
             var cases = casesCache.get(proto);
             if (cases == null) {
-                if (typeof proto[FSymbol.reflection] === "function") {
-                    cases = proto[FSymbol.reflection]().cases;
+                if (typeof proto[_Symbol.reflection] === "function") {
+                    cases = proto[_Symbol.reflection]().cases;
                     casesCache.set(proto, cases);
                 }
             }
@@ -3657,7 +3669,7 @@ var List$1 = function () {
         //   }
 
     }, {
-        key: FSymbol.reflection,
+        key: _Symbol.reflection,
         value: function value() {
             return {
                 type: "Microsoft.FSharp.Collections.FSharpList",
@@ -3687,7 +3699,7 @@ var Comparer = function () {
     }
 
     createClass$2(Comparer, [{
-        key: FSymbol.reflection,
+        key: _Symbol.reflection,
         value: function value() {
             return { interfaces: ["System.IComparer"] };
         }
@@ -3729,6 +3741,12 @@ var Enumerator = function () {
 }();
 
 
+function __failIfNone(res) {
+    if (res == null) {
+        throw new Error("Seq did not contain any matching element");
+    }
+    return res;
+}
 function toList(xs) {
     return foldBack$1(function (x, acc) {
         return new List$1(x, acc);
@@ -3873,8 +3891,18 @@ function iterate$1(f, xs) {
 
 
 
-
-
+function tryLast(xs) {
+    try {
+        return reduce(function (_, x) {
+            return x;
+        }, xs);
+    } catch (err) {
+        return null;
+    }
+}
+function last(xs) {
+    return __failIfNone(tryLast(xs));
+}
 // A export function 'length' method causes problems in JavaScript -- https://github.com/Microsoft/TypeScript/issues/442
 function count(xs) {
     return Array.isArray(xs) || ArrayBuffer.isView(xs) ? xs.length : fold$1(function (acc, x) {
@@ -3917,7 +3945,25 @@ function map2(f, xs, ys) {
 
 
 
-
+function reduce(f, xs) {
+    if (Array.isArray(xs) || ArrayBuffer.isView(xs)) {
+        return xs.reduce(f);
+    }
+    var iter = xs[Symbol.iterator]();
+    var cur = iter.next();
+    if (cur.done) {
+        throw new Error("Seq was empty");
+    }
+    var acc = cur.value;
+    while (true) {
+        cur = iter.next();
+        if (cur.done) {
+            break;
+        }
+        acc = f(acc, cur.value);
+    }
+    return acc;
+}
 
 
 
@@ -4382,7 +4428,7 @@ var FableMap = function () {
             this.tree = tree_empty();
         }
     }, {
-        key: FSymbol.reflection,
+        key: _Symbol.reflection,
         value: function value() {
             return {
                 type: "Microsoft.FSharp.Collections.FSharpMap",
@@ -4471,7 +4517,7 @@ var Props = function (__exports) {
     }
 
     babelHelpers.createClass(CSSProp, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Fable.Helpers.React.Props.CSSProp",
@@ -4498,7 +4544,7 @@ var Props = function (__exports) {
     }
 
     babelHelpers.createClass(Prop, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Fable.Helpers.React.Props.Prop",
@@ -4520,7 +4566,7 @@ var Props = function (__exports) {
     }
 
     babelHelpers.createClass(DOMAttr, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Fable.Helpers.React.Props.DOMAttr",
@@ -4542,7 +4588,7 @@ var Props = function (__exports) {
     }
 
     babelHelpers.createClass(HTMLAttr, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Fable.Helpers.React.Props.HTMLAttr",
@@ -4569,7 +4615,7 @@ var Props = function (__exports) {
     }
 
     babelHelpers.createClass(SVGAttr, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Fable.Helpers.React.Props.SVGAttr",
@@ -4622,7 +4668,7 @@ var Elements = function () {
   }
 
   babelHelpers.createClass(Elements, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Global.Elements",
@@ -4652,7 +4698,7 @@ var Page = function () {
   }
 
   babelHelpers.createClass(Page, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Global.Page",
@@ -4695,7 +4741,7 @@ var StandardSize = function () {
   }
 
   babelHelpers.createClass(StandardSize, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.BulmaClasses.StandardSize",
@@ -4736,7 +4782,7 @@ var LevelAndColor = function () {
   }
 
   babelHelpers.createClass(LevelAndColor, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.BulmaClasses.LevelAndColor",
@@ -4775,7 +4821,7 @@ var GenericIsActiveState = function () {
   }
 
   babelHelpers.createClass(GenericIsActiveState, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.BulmaClasses.GenericIsActiveState",
@@ -4823,7 +4869,7 @@ var GenericColumnSize = function () {
   }
 
   babelHelpers.createClass(GenericColumnSize, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.BulmaClasses.GenericColumnSize",
@@ -4878,7 +4924,7 @@ var DisplayType = function () {
   }
 
   babelHelpers.createClass(DisplayType, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.BulmaClasses.DisplayType",
@@ -5487,7 +5533,7 @@ var ISize = function () {
   }
 
   babelHelpers.createClass(ISize, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.Common.ISize",
@@ -5517,7 +5563,7 @@ var ILevelAndColor = function () {
   }
 
   babelHelpers.createClass(ILevelAndColor, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.Common.ILevelAndColor",
@@ -5577,7 +5623,7 @@ var GenericOption = function () {
   }
 
   babelHelpers.createClass(GenericOption, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.Common.GenericOption",
@@ -5604,7 +5650,7 @@ var GenericOptions = function () {
   }
 
   babelHelpers.createClass(GenericOptions, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Bulma.Common.GenericOptions",
@@ -6464,7 +6510,7 @@ var Long = function () {
             return (!this.unsigned && !this.lessThan(0) ? "+" : "") + this.toString();
         }
     }, {
-        key: FSymbol.reflection,
+        key: _Symbol.reflection,
         value: function value() {
             return {
                 type: this.unsigned ? "System.UInt64" : "System.Int64",
@@ -6679,7 +6725,25 @@ var MAX_UNSIGNED_VALUE = fromBits(0xFFFFFFFF | 0, 0xFFFFFFFF | 0, true);
 var MIN_VALUE = fromBits(0, 0x80000000 | 0, false);
 
 /* tslint:disable */
-
+function parse$1(v, kind) {
+    if (kind == null) {
+        kind = typeof v === "string" && v.slice(-1) === "Z" ? 1 /* UTC */ : 2 /* Local */;
+    }
+    var date = v == null ? new Date() : new Date(v);
+    if (isNaN(date.getTime())) {
+        // Check if this is a time-only string, which JS Date parsing cannot handle (see #1045)
+        if (typeof v === "string" && /^(?:[01]?\d|2[0-3]):(?:[0-5]?\d)(?::[0-5]?\d(?:\.\d+)?)?(?:\s*[AaPp][Mm])?$/.test(v)) {
+            var d = new Date();
+            date = new Date(d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate() + " " + v);
+        } else {
+            throw new Error("The string is not a valid Date.");
+        }
+    }
+    if (kind === 2 /* Local */) {
+            date.kind = kind;
+        }
+    return date;
+}
 /* tslint:enable */
 
 // From http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
@@ -6906,7 +6970,7 @@ var Types = function (__exports) {
     }
 
     babelHelpers.createClass(IDisplay, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Columns.Types.IDisplay",
@@ -6938,7 +7002,7 @@ var Types = function (__exports) {
     }
 
     babelHelpers.createClass(ISpacing, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Columns.Types.ISpacing",
@@ -6970,7 +7034,7 @@ var Types = function (__exports) {
     }
 
     babelHelpers.createClass(IAlignement, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Columns.Types.IAlignement",
@@ -7002,7 +7066,7 @@ var Types = function (__exports) {
     }
 
     babelHelpers.createClass(Option$$1, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Columns.Types.Option",
@@ -7060,7 +7124,7 @@ var Types = function (__exports) {
     }
 
     babelHelpers.createClass(Options, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Columns.Types.Options",
@@ -7149,7 +7213,7 @@ var Types$1 = function (__exports) {
     }
 
     babelHelpers.createClass(ISize, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Column.Types.ISize",
@@ -7181,7 +7245,7 @@ var Types$1 = function (__exports) {
     }
 
     babelHelpers.createClass(IScreen, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Column.Types.IScreen",
@@ -7213,7 +7277,7 @@ var Types$1 = function (__exports) {
     }
 
     babelHelpers.createClass(Option$$1, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Column.Types.Option",
@@ -7640,7 +7704,7 @@ var Types$1 = function (__exports) {
     }
 
     babelHelpers.createClass(Options, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Grids.Column.Types.Options",
@@ -8050,14 +8114,14 @@ var Types$2 = function (__exports) {
     }
 
     babelHelpers.createClass(Option$$1, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Extensions.Checkbox.Types.Option",
           interfaces: ["FSharpUnion"],
-          cases: [["Level", ILevelAndColor], ["Size", ISize], ["IsCircle"], ["IsChecked"], ["IsDisabled"], ["Value", "string"], ["Label", "string"], ["Props", makeGeneric(List$1, {
+          cases: [["Level", ILevelAndColor], ["Size", ISize], ["IsCircle"], ["IsChecked", "boolean"], ["IsDisabled", "boolean"], ["Value", "string"], ["Label", "string"], ["Props", makeGeneric(List$1, {
             T: Interface("Fable.Helpers.React.Props.IHTMLProp")
-          })], ["OnClick", FableFunction([Interface("Fable.Import.React.MouseEvent"), Unit])], ["CustomClass", "string"]]
+          })], ["OnChange", FableFunction([Interface("Fable.Import.React.FormEvent"), Unit])], ["CustomClass", "string"], ["ComponentId", "string"]]
         };
       }
     }]);
@@ -8080,7 +8144,7 @@ var Types$2 = function (__exports) {
   };
 
   var Options = __exports.Options = function () {
-    function Options(level, size, isCircle, isChecked, isDisabled, value, label, props, customClass, onClick) {
+    function Options(level, size, isCircle, isChecked, isDisabled, value, label, props, customClass, onChange, componentId) {
       babelHelpers.classCallCheck(this, Options);
       this.Level = level;
       this.Size = size;
@@ -8091,11 +8155,12 @@ var Types$2 = function (__exports) {
       this.Label = label;
       this.Props = props;
       this.CustomClass = customClass;
-      this.OnClick = onClick;
+      this.OnChange = onChange;
+      this.ComponentId = componentId;
     }
 
     babelHelpers.createClass(Options, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Extensions.Checkbox.Types.Options",
@@ -8112,14 +8177,20 @@ var Types$2 = function (__exports) {
               T: Interface("Fable.Helpers.React.Props.IHTMLProp")
             }),
             CustomClass: Option("string"),
-            OnClick: Option(FableFunction([Interface("Fable.Import.React.MouseEvent"), Unit]))
+            OnChange: Option(FableFunction([Interface("Fable.Import.React.FormEvent"), Unit])),
+            ComponentId: "string"
           }
         };
       }
     }], [{
       key: "Empty",
       get: function get() {
-        return new Options(null, null, false, false, false, "", "", new List$1(), null, null);
+        return new Options(null, null, false, false, false, "", "", new List$1(), null, null, {
+          formatFn: fsFormat("%O"),
+          input: "%O"
+        }.formatFn(function (x) {
+          return x;
+        })(newGuid()));
       }
     }]);
     return Options;
@@ -8131,8 +8202,8 @@ var Types$2 = function (__exports) {
 var isSmall = new Types$2.Option(1, new ISize(0));
 var isMedium = new Types$2.Option(1, new ISize(1));
 var isLarge = new Types$2.Option(1, new ISize(2));
-var isChecked = new Types$2.Option(3);
-var isDisabled = new Types$2.Option(4);
+var isChecked = new Types$2.Option(3, true);
+var isDisabled = new Types$2.Option(4, true);
 var isCircle = new Types$2.Option(2);
 var isBlack = new Types$2.Option(0, new ILevelAndColor(0));
 var isDark = new Types$2.Option(0, new ILevelAndColor(1));
@@ -8145,35 +8216,38 @@ var isWarning = new Types$2.Option(0, new ILevelAndColor(7));
 var isDanger = new Types$2.Option(0, new ILevelAndColor(8));
 
 
-function props$2(props_1) {
-  return new Types$2.Option(7, props_1);
-}
 
+
+function onChange(cb) {
+  return new Types$2.Option(8, cb);
+}
 function checkbox(options, children) {
   var parseOptions = function parseOptions(result, opt) {
     if (opt.tag === 1) {
       var Size = ofSize(opt.data);
-      return new Types$2.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnClick);
+      return new Types$2.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 2) {
-      return new Types$2.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnClick);
+      return new Types$2.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 3) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, true, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnClick);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, opt.data, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 4) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, true, result.Value, result.Label, result.Props, result.CustomClass, result.OnClick);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, opt.data, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 5) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Props, result.CustomClass, result.OnClick);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 6) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Props, result.CustomClass, result.OnClick);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 7) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.CustomClass, result.OnClick);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 9) {
       var CustomClass = opt.data;
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, CustomClass, result.OnClick);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 8) {
-      var OnClick = opt.data;
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, OnClick);
+      var OnChange = opt.data;
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, OnChange, result.ComponentId);
+    } else if (opt.tag === 10) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, opt.data);
     } else {
-      return new Types$2.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnClick);
+      return new Types$2.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     }
   };
 
@@ -8184,12 +8258,6 @@ function checkbox(options, children) {
     };
   }()(options);
 
-  var id = {
-    formatFn: fsFormat("%O"),
-    input: "%O"
-  }.formatFn(function (x) {
-    return x;
-  })(newGuid());
   return react_1("div", {
     className: "field"
   }, react_1("input", createObj(toList(delay(function () {
@@ -8203,21 +8271,21 @@ function checkbox(options, children) {
       return opts.CustomClass != null;
     }()]]))), delay(function () {
       return append$1(function () {
-        return opts.OnClick != null;
-      }() ? singleton$1(new Props.DOMAttr(39, opts.OnClick)) : empty(), delay(function () {
+        return opts.OnChange != null;
+      }() ? append$1(singleton$1(new Props.HTMLAttr(20, opts.IsChecked)), delay(function () {
+        return singleton$1(new Props.DOMAttr(9, opts.OnChange));
+      })) : singleton$1(new Props.HTMLAttr(0, opts.IsChecked)), delay(function () {
         return append$1(opts.Props, delay(function () {
           return append$1(singleton$1(new Props.HTMLAttr(116, "checkbox")), delay(function () {
-            return append$1(singleton$1(new Props.HTMLAttr(56, id)), delay(function () {
-              return append$1(opts.IsChecked ? singleton$1(new Props.HTMLAttr(20, true)) : empty(), delay(function () {
-                return opts.IsDisabled ? singleton$1(new Props.HTMLAttr(37, true)) : empty();
-              }));
+            return append$1(singleton$1(new Props.HTMLAttr(56, opts.ComponentId)), delay(function () {
+              return singleton$1(new Props.HTMLAttr(37, opts.IsDisabled));
             }));
           }));
         }));
       }));
     }));
   })), 1)), react_1.apply(undefined, ["label", {
-    htmlFor: id
+    htmlFor: opts.ComponentId
   }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
     return children.tail == null ? singleton$1(opts.Label) : children;
   }))))));
@@ -8231,7 +8299,7 @@ var Model$1 = function () {
   }
 
   babelHelpers.createClass(Model, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Viewer.Types.Model",
@@ -8264,7 +8332,7 @@ var Msg$1 = function () {
   }
 
   babelHelpers.createClass(Msg, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Viewer.Types.Msg",
@@ -8288,17 +8356,18 @@ var Msg$1 = function () {
 setType("Viewer.Types.Msg", Msg$1);
 
 var Model = function () {
-  function Model(intro, colorViewer, sizeViewer, circleViewer, isChecked) {
+  function Model(intro, colorViewer, sizeViewer, circleViewer, stateViewer, isChecked) {
     babelHelpers.classCallCheck(this, Model);
     this.Intro = intro;
     this.ColorViewer = colorViewer;
     this.SizeViewer = sizeViewer;
     this.CircleViewer = circleViewer;
+    this.StateViewer = stateViewer;
     this.IsChecked = isChecked;
   }
 
   babelHelpers.createClass(Model, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elements.Checkbox.Types.Model",
@@ -8308,6 +8377,7 @@ var Model = function () {
           ColorViewer: Model$1,
           SizeViewer: Model$1,
           CircleViewer: Model$1,
+          StateViewer: Model$1,
           IsChecked: "boolean"
         }
       };
@@ -8334,7 +8404,7 @@ var Msg = function () {
   }
 
   babelHelpers.createClass(Msg, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elements.Checkbox.Types.Msg",
@@ -8358,6 +8428,70 @@ var Msg = function () {
 setType("Elements.Checkbox.Types.Msg", Msg);
 
 var Types$3 = function (__exports) {
+  var ISize$$1 = __exports.ISize = function () {
+    function ISize$$1(tag, data) {
+      babelHelpers.classCallCheck(this, ISize$$1);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(ISize$$1, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Button.Types.ISize",
+          interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
+          cases: [["IsSmall"], ["IsMedium"], ["IsLarge"], ["IsFullWidth"], ["Nothing"]]
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return this === other || this.tag === other.tag && equals(this.data, other.data);
+      }
+    }, {
+      key: "CompareTo",
+      value: function CompareTo(other) {
+        return compareUnions(this, other) | 0;
+      }
+    }]);
+    return ISize$$1;
+  }();
+
+  setType("Elmish.Bulma.Elements.Button.Types.ISize", ISize$$1);
+
+  var IState = __exports.IState = function () {
+    function IState(tag, data) {
+      babelHelpers.classCallCheck(this, IState);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(IState, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Button.Types.IState",
+          interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
+          cases: [["IsHovered"], ["IsFocused"], ["IsActive"], ["IsLoading"], ["Nothing"]]
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return this === other || this.tag === other.tag && equals(this.data, other.data);
+      }
+    }, {
+      key: "CompareTo",
+      value: function CompareTo(other) {
+        return compareUnions(this, other) | 0;
+      }
+    }]);
+    return IState;
+  }();
+
+  setType("Elmish.Bulma.Elements.Button.Types.IState", IState);
+
   var Option$$1 = __exports.Option = function () {
     function Option$$1(tag, data) {
       babelHelpers.classCallCheck(this, Option$$1);
@@ -8366,7 +8500,357 @@ var Types$3 = function (__exports) {
     }
 
     babelHelpers.createClass(Option$$1, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Button.Types.Option",
+          interfaces: ["FSharpUnion"],
+          cases: [["Level", ILevelAndColor], ["Size", ISize$$1], ["IsOutlined"], ["IsInverted"], ["IsLink"], ["State", IState], ["Props", makeGeneric(List$1, {
+            T: Interface("Fable.Helpers.React.Props.IHTMLProp")
+          })], ["OnClick", FableFunction([Interface("Fable.Import.React.MouseEvent"), Unit])], ["CustomClass", "string"]]
+        };
+      }
+    }]);
+    return Option$$1;
+  }();
+
+  setType("Elmish.Bulma.Elements.Button.Types.Option", Option$$1);
+
+  var ofSize$$1 = __exports.ofSize = function (size) {
+    if (size.tag === 1) {
+      return "is-medium";
+    } else if (size.tag === 2) {
+      return "is-large ";
+    } else if (size.tag === 3) {
+      return "is-fullwidth";
+    } else if (size.tag === 4) {
+      return "";
+    } else {
+      return "is-small";
+    }
+  };
+
+  var ofStyles = __exports.ofStyles = function (style) {
+    if (style.tag === 2) {
+      return "is-outlined";
+    } else if (style.tag === 3) {
+      return "is-inverted";
+    } else if (style.tag === 4) {
+      return "is-link";
+    } else {
+      return {
+        formatFn: fsFormat("%A isn't a valid style value"),
+        input: "%A isn't a valid style value"
+      }.formatFn(function (x) {
+        throw new Error(x);
+      })(style);
+    }
+  };
+
+  var ofState = __exports.ofState = function (state) {
+    if (state.tag === 0) {
+      return "is-hovered";
+    } else if (state.tag === 1) {
+      return "is-focus";
+    } else if (state.tag === 2) {
+      return "is-active";
+    } else if (state.tag === 3) {
+      return "is-loading";
+    } else {
+      return "";
+    }
+  };
+
+  var Options = __exports.Options = function () {
+    function Options(level, size, isOutlined, isInverted, isLink, state, props, customClass, onClick) {
+      babelHelpers.classCallCheck(this, Options);
+      this.Level = level;
+      this.Size = size;
+      this.IsOutlined = isOutlined;
+      this.IsInverted = isInverted;
+      this.IsLink = isLink;
+      this.State = state;
+      this.Props = props;
+      this.CustomClass = customClass;
+      this.OnClick = onClick;
+    }
+
+    babelHelpers.createClass(Options, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Button.Types.Options",
+          interfaces: ["FSharpRecord"],
+          properties: {
+            Level: Option("string"),
+            Size: Option("string"),
+            IsOutlined: "boolean",
+            IsInverted: "boolean",
+            IsLink: "boolean",
+            State: Option("string"),
+            Props: makeGeneric(List$1, {
+              T: Interface("Fable.Helpers.React.Props.IHTMLProp")
+            }),
+            CustomClass: Option("string"),
+            OnClick: Option(FableFunction([Interface("Fable.Import.React.MouseEvent"), Unit]))
+          }
+        };
+      }
+    }], [{
+      key: "Empty",
+      get: function get() {
+        return new Options(null, null, false, false, false, null, new List$1(), null, null);
+      }
+    }]);
+    return Options;
+  }();
+
+  setType("Elmish.Bulma.Elements.Button.Types.Options", Options);
+  return __exports;
+}({});
+var isSmall$1 = new Types$3.Option(1, new Types$3.ISize(0));
+var isMedium$1 = new Types$3.Option(1, new Types$3.ISize(1));
+var isLarge$1 = new Types$3.Option(1, new Types$3.ISize(2));
+var isFullWidth = new Types$3.Option(1, new Types$3.ISize(3));
+var isHovered = new Types$3.Option(5, new Types$3.IState(0));
+var isFocused = new Types$3.Option(5, new Types$3.IState(1));
+var isActive = new Types$3.Option(5, new Types$3.IState(2));
+var isLoading = new Types$3.Option(5, new Types$3.IState(3));
+var isOutlined = new Types$3.Option(2);
+var isInverted = new Types$3.Option(3);
+var isLink = new Types$3.Option(4);
+var isBlack$1 = new Types$3.Option(0, new ILevelAndColor(0));
+var isDark$1 = new Types$3.Option(0, new ILevelAndColor(1));
+var isLight$1 = new Types$3.Option(0, new ILevelAndColor(2));
+var isWhite$1 = new Types$3.Option(0, new ILevelAndColor(3));
+var isPrimary$1 = new Types$3.Option(0, new ILevelAndColor(4));
+var isInfo$1 = new Types$3.Option(0, new ILevelAndColor(5));
+var isSuccess$1 = new Types$3.Option(0, new ILevelAndColor(6));
+var isWarning$1 = new Types$3.Option(0, new ILevelAndColor(7));
+var isDanger$1 = new Types$3.Option(0, new ILevelAndColor(8));
+
+
+
+function button(options, children) {
+  var parseOptions = function parseOptions(result, opt) {
+    if (opt.tag === 1) {
+      var Size = Types$3.ofSize(opt.data);
+      return new Types$3.Options(result.Level, Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, result.Props, result.CustomClass, result.OnClick);
+    } else if (opt.tag === 2) {
+      return new Types$3.Options(result.Level, result.Size, true, result.IsInverted, result.IsLink, result.State, result.Props, result.CustomClass, result.OnClick);
+    } else if (opt.tag === 3) {
+      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, true, result.IsLink, result.State, result.Props, result.CustomClass, result.OnClick);
+    } else if (opt.tag === 4) {
+      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, true, result.State, result.Props, result.CustomClass, result.OnClick);
+    } else if (opt.tag === 5) {
+      var State = Types$3.ofState(opt.data);
+      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, result.IsLink, State, result.Props, result.CustomClass, result.OnClick);
+    } else if (opt.tag === 6) {
+      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, opt.data, result.CustomClass, result.OnClick);
+    } else if (opt.tag === 8) {
+      var CustomClass = opt.data;
+      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, result.Props, CustomClass, result.OnClick);
+    } else if (opt.tag === 7) {
+      var OnClick = opt.data;
+      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, result.Props, result.CustomClass, OnClick);
+    } else {
+      return new Types$3.Options(ofLevelAndColor(opt.data), result.Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, result.Props, result.CustomClass, result.OnClick);
+    }
+  };
+
+  var opts = function () {
+    var state = Types$3.Options.Empty;
+    return function (list) {
+      return fold$1(parseOptions, state, list);
+    };
+  }()(options);
+
+  return react_1.apply(undefined, ["a", createObj(toList(delay(function () {
+    return append$1(singleton$1(classBaseList(join(" ", new List$1("button", map(function (x) {
+      return x;
+    }, filter(function (x_1) {
+      return function () {
+        return x_1 != null;
+      }();
+    }, ofArray([opts.Level, opts.Size, opts.State]))))), ofArray([["is-outlined", opts.IsOutlined], ["is-inverted", opts.IsInverted], ["is-link", opts.IsLink], [opts.CustomClass, function () {
+      return opts.CustomClass != null;
+    }()]]))), delay(function () {
+      return append$1(function () {
+        return opts.OnClick != null;
+      }() ? singleton$1(new Props.DOMAttr(39, opts.OnClick)) : empty(), delay(function () {
+        return opts.Props;
+      }));
+    }));
+  })), 1)].concat(babelHelpers.toConsumableArray(children)));
+}
+
+var Types$4 = function (__exports) {
+  var ITagSize = __exports.ITagSize = function () {
+    function ITagSize(tag, data) {
+      babelHelpers.classCallCheck(this, ITagSize);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(ITagSize, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Tag.Types.ITagSize",
+          interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
+          cases: [["IsMedium"], ["IsLarge"]]
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return this === other || this.tag === other.tag && equals(this.data, other.data);
+      }
+    }, {
+      key: "CompareTo",
+      value: function CompareTo(other) {
+        return compareUnions(this, other) | 0;
+      }
+    }]);
+    return ITagSize;
+  }();
+
+  setType("Elmish.Bulma.Elements.Tag.Types.ITagSize", ITagSize);
+
+  var Option$$1 = __exports.Option = function () {
+    function Option$$1(tag, data) {
+      babelHelpers.classCallCheck(this, Option$$1);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(Option$$1, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Tag.Types.Option",
+          interfaces: ["FSharpUnion", "System.IEquatable"],
+          cases: [["Size", ITagSize], ["Color", ILevelAndColor], ["Props", makeGeneric(List$1, {
+            T: Interface("Fable.Helpers.React.Props.IHTMLProp")
+          })], ["CustomClass", "string"]]
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return this === other || this.tag === other.tag && equals(this.data, other.data);
+      }
+    }]);
+    return Option$$1;
+  }();
+
+  setType("Elmish.Bulma.Elements.Tag.Types.Option", Option$$1);
+
+  var ofTagSize = __exports.ofTagSize = function (size) {
+    if (size.tag === 1) {
+      return "is-large";
+    } else {
+      return "is-medium";
+    }
+  };
+
+  var Options = __exports.Options = function () {
+    function Options(size, color, props, customClass) {
+      babelHelpers.classCallCheck(this, Options);
+      this.Size = size;
+      this.Color = color;
+      this.Props = props;
+      this.CustomClass = customClass;
+    }
+
+    babelHelpers.createClass(Options, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Tag.Types.Options",
+          interfaces: ["FSharpRecord", "System.IEquatable"],
+          properties: {
+            Size: Option("string"),
+            Color: Option("string"),
+            Props: makeGeneric(List$1, {
+              T: Interface("Fable.Helpers.React.Props.IHTMLProp")
+            }),
+            CustomClass: Option("string")
+          }
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return equalsRecords(this, other);
+      }
+    }], [{
+      key: "Empty",
+      get: function get() {
+        return new Options(null, null, new List$1(), null);
+      }
+    }]);
+    return Options;
+  }();
+
+  setType("Elmish.Bulma.Elements.Tag.Types.Options", Options);
+  return __exports;
+}({});
+var isMedium$2 = new Types$4.Option(0, new Types$4.ITagSize(0));
+var isLarge$2 = new Types$4.Option(0, new Types$4.ITagSize(1));
+var isBlack$2 = new Types$4.Option(1, new ILevelAndColor(0));
+var isDark$2 = new Types$4.Option(1, new ILevelAndColor(1));
+var isLight$2 = new Types$4.Option(1, new ILevelAndColor(2));
+var isWhite$2 = new Types$4.Option(1, new ILevelAndColor(3));
+var isPrimary$2 = new Types$4.Option(1, new ILevelAndColor(4));
+var isInfo$2 = new Types$4.Option(1, new ILevelAndColor(5));
+var isSuccess$2 = new Types$4.Option(1, new ILevelAndColor(6));
+var isWarning$2 = new Types$4.Option(1, new ILevelAndColor(7));
+var isDanger$2 = new Types$4.Option(1, new ILevelAndColor(8));
+
+
+function tag(options, children) {
+  var parseOption = function parseOption(result, opt) {
+    if (opt.tag === 1) {
+      var Color = ofLevelAndColor(opt.data);
+      return new Types$4.Options(result.Size, Color, result.Props, result.CustomClass);
+    } else if (opt.tag === 2) {
+      return new Types$4.Options(result.Size, result.Color, opt.data, result.CustomClass);
+    } else if (opt.tag === 3) {
+      var CustomClass = opt.data;
+      return new Types$4.Options(result.Size, result.Color, result.Props, CustomClass);
+    } else {
+      return new Types$4.Options(Types$4.ofTagSize(opt.data), result.Color, result.Props, result.CustomClass);
+    }
+  };
+
+  var opts = function () {
+    var state = Types$4.Options.Empty;
+    return function (list) {
+      return fold$1(parseOption, state, list);
+    };
+  }()(options);
+
+  var className = new Props.HTMLAttr(22, join(" ", new List$1("tag", map(function (x) {
+    return x;
+  }, filter(function (x_1) {
+    return function () {
+      return x_1 != null;
+    }();
+  }, ofArray([opts.Size, opts.Color, opts.CustomClass]))))));
+  return react_1.apply(undefined, ["span", createObj(new List$1(className, opts.Props), 1)].concat(babelHelpers.toConsumableArray(children)));
+}
+
+var Types$5 = function (__exports) {
+  var Option$$1 = __exports.Option = function () {
+    function Option$$1(tag, data) {
+      babelHelpers.classCallCheck(this, Option$$1);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(Option$$1, [{
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Elements.Content.Types.Option",
@@ -8396,7 +8880,7 @@ var Types$3 = function (__exports) {
     }
 
     babelHelpers.createClass(Options, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Elements.Content.Types.Options",
@@ -8427,25 +8911,25 @@ var Types$3 = function (__exports) {
   setType("Elmish.Bulma.Elements.Content.Types.Options", Options);
   return __exports;
 }({});
-var isSmall$1 = new Types$3.Option(0, new ISize(0));
-var isMedium$1 = new Types$3.Option(0, new ISize(1));
-var isLarge$1 = new Types$3.Option(0, new ISize(2));
+var isSmall$2 = new Types$5.Option(0, new ISize(0));
+var isMedium$3 = new Types$5.Option(0, new ISize(1));
+var isLarge$3 = new Types$5.Option(0, new ISize(2));
 
 
 function content(options, children) {
   var parseOption = function parseOption(result, opt) {
     if (opt.tag === 1) {
       var CustomClass = opt.data;
-      return new Types$3.Options(result.Size, result.Props, CustomClass);
+      return new Types$5.Options(result.Size, result.Props, CustomClass);
     } else if (opt.tag === 2) {
-      return new Types$3.Options(result.Size, opt.data, result.CustomClass);
+      return new Types$5.Options(result.Size, opt.data, result.CustomClass);
     } else {
-      return new Types$3.Options(ofSize(opt.data), result.Props, result.CustomClass);
+      return new Types$5.Options(ofSize(opt.data), result.Props, result.CustomClass);
     }
   };
 
   var opts = function () {
-    var state = Types$3.Options.Empty;
+    var state = Types$5.Options.Empty;
     return function (list) {
       return fold$1(parseOption, state, list);
     };
@@ -8576,7 +9060,7 @@ var Footer = function (__exports) {
   return __exports;
 }({});
 
-var Types$4 = function (__exports) {
+var Types$6 = function (__exports) {
   var IPosition = __exports.IPosition = function () {
     function IPosition(tag, data) {
       babelHelpers.classCallCheck(this, IPosition);
@@ -8585,7 +9069,7 @@ var Types$4 = function (__exports) {
     }
 
     babelHelpers.createClass(IPosition, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Elements.Icon.Types.IPosition",
@@ -8617,7 +9101,7 @@ var Types$4 = function (__exports) {
     }
 
     babelHelpers.createClass(Option$$1, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Elements.Icon.Types.Option",
@@ -8648,7 +9132,7 @@ var Types$4 = function (__exports) {
     }
 
     babelHelpers.createClass(Options, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return {
           type: "Elmish.Bulma.Elements.Icon.Types.Options",
@@ -8689,30 +9173,30 @@ var Types$4 = function (__exports) {
 
   return __exports;
 }({});
-var isSmall$2 = new Types$4.Option(0, new ISize(0));
-var isMedium$2 = new Types$4.Option(0, new ISize(1));
-var isLarge$2 = new Types$4.Option(0, new ISize(2));
-var isLeft = new Types$4.Option(1, new Types$4.IPosition(0));
-var isRight = new Types$4.Option(1, new Types$4.IPosition(1));
+var isSmall$3 = new Types$6.Option(0, new ISize(0));
+var isMedium$4 = new Types$6.Option(0, new ISize(1));
+var isLarge$4 = new Types$6.Option(0, new ISize(2));
+var isLeft = new Types$6.Option(1, new Types$6.IPosition(0));
+var isRight = new Types$6.Option(1, new Types$6.IPosition(1));
 
 
 function icon(options, children) {
   var parseOptions = function parseOptions(result, option) {
     if (option.tag === 1) {
-      var Position = Types$4.ofPosition(option.data);
-      return new Types$4.Options(result.Size, Position, result.CustomClass, result.Props);
+      var Position = Types$6.ofPosition(option.data);
+      return new Types$6.Options(result.Size, Position, result.CustomClass, result.Props);
     } else if (option.tag === 2) {
       var CustomClass = option.data;
-      return new Types$4.Options(result.Size, result.Position, CustomClass, result.Props);
+      return new Types$6.Options(result.Size, result.Position, CustomClass, result.Props);
     } else if (option.tag === 3) {
-      return new Types$4.Options(result.Size, result.Position, result.CustomClass, option.data);
+      return new Types$6.Options(result.Size, result.Position, result.CustomClass, option.data);
     } else {
-      return new Types$4.Options(ofSize(option.data), result.Position, result.CustomClass, result.Props);
+      return new Types$6.Options(ofSize(option.data), result.Position, result.CustomClass, result.Props);
     }
   };
 
   var opts = function () {
-    var state = Types$4.Options.Empty;
+    var state = Types$6.Options.Empty;
     return function (list) {
       return fold$1(parseOptions, state, list);
     };
@@ -8760,28 +9244,47 @@ function root$2(interactiveView, model, dispatch) {
 }
 
 var colorInteractive = columns(new List$1(), ofArray([column(new List$1(), ofArray([react_1("div", {
-  className: "block"
-}, checkbox(new List$1(), ofArray(["Checkbox"])), checkbox(ofArray([isWhite]), ofArray(["White"])), checkbox(ofArray([isLight]), ofArray(["Light"])), checkbox(ofArray([isDark]), ofArray(["Dark"])), checkbox(ofArray([isBlack]), ofArray(["Black"])))])), column(new List$1(), ofArray([react_1("div", {
-  className: "block"
-}, checkbox(ofArray([isPrimary]), ofArray(["Primary"])), checkbox(ofArray([isInfo]), ofArray(["Info"])), checkbox(ofArray([isSuccess]), ofArray(["Success"])), checkbox(ofArray([isWarning]), ofArray(["Warning"])), checkbox(ofArray([isDanger]), ofArray(["Danger"])))]))]));
+  className: "block callout is-primary"
+}, checkbox(ofArray([isChecked]), ofArray(["Checkbox"])), checkbox(ofArray([isChecked, isWhite]), ofArray(["White"])), checkbox(ofArray([isChecked, isLight]), ofArray(["Light"])), checkbox(ofArray([isChecked, isDark]), ofArray(["Dark"])), checkbox(ofArray([isChecked, isBlack]), ofArray(["Black"])))])), column(new List$1(), ofArray([react_1("div", {
+  className: "block callout"
+}, checkbox(ofArray([isChecked, isPrimary]), ofArray(["Primary"])), checkbox(ofArray([isChecked, isInfo]), ofArray(["Info"])), checkbox(ofArray([isChecked, isSuccess]), ofArray(["Success"])), checkbox(ofArray([isChecked, isWarning]), ofArray(["Warning"])), checkbox(ofArray([isChecked, isDanger]), ofArray(["Danger"])))]))]));
 var sizeInteractive = react_1("div", {
   className: "block"
-}, checkbox(ofArray([isSmall]), ofArray(["Small"])), checkbox(new List$1(), ofArray(["Normal"])), checkbox(ofArray([isMedium]), ofArray(["Medium"])), checkbox(ofArray([isLarge]), ofArray(["Large"])));
+}, checkbox(ofArray([isChecked, isSmall]), ofArray(["Small"])), checkbox(ofArray([isChecked]), ofArray(["Normal"])), checkbox(ofArray([isChecked, isMedium]), ofArray(["Medium"])), checkbox(ofArray([isChecked, isLarge]), ofArray(["Large"])));
 var stylesInteractive = react_1("div", {
   className: "block"
 }, checkbox(ofArray([isChecked, isCircle, isDisabled]), ofArray(["Checkbox"])), checkbox(ofArray([isChecked, isCircle, isPrimary]), ofArray(["Checkbox"])), checkbox(ofArray([isChecked, isCircle, isSuccess]), ofArray(["Checkbox - success"])), checkbox(ofArray([isChecked, isCircle, isWarning]), ofArray(["Checkbox - warning"])), checkbox(ofArray([isChecked, isCircle, isDanger]), ofArray(["Checkbox - danger"])), checkbox(ofArray([isChecked, isCircle, isInfo]), ofArray(["Checkbox - info"])));
+var stateInteractive = react_1("div", {
+  className: "block"
+}, checkbox(ofArray([isDisabled]), ofArray(["Disabled"])), checkbox(ofArray([isDisabled, isChecked]), ofArray(["Disabled & Checked"])), checkbox(new List$1(), ofArray(["Unchecked"])), checkbox(ofArray([isChecked]), ofArray(["checked"])));
 function extraInteractive(model, dispatch) {
   var state = !model.IsChecked;
   return react_1("div", {
     className: "block"
-  }, checkbox(ofArray([props$2(ofArray([new Props.DOMAttr(9, function (x) {
-    dispatch(new Msg(3, state));
-  })]))]), ofArray([{
+  }, checkbox(toList(delay(function () {
+    return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
+      return singleton$1(onChange(function (x) {
+        dispatch(new Msg(3, state));
+      }));
+    }));
+  })), ofArray([{
     formatFn: fsFormat("%A"),
     input: "%A"
   }.formatFn(function (x) {
     return x;
-  })(state)])));
+  })(model.IsChecked)])), checkbox(toList(delay(function () {
+    return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
+      return singleton$1(onChange(function (x_1) {
+        dispatch(new Msg(3, state));
+      }));
+    }));
+  })), ofArray([model.IsChecked ? ":p" : ":'("])), checkbox(toList(delay(function () {
+    return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
+      return singleton$1(onChange(function (x_2) {
+        dispatch(new Msg(3, state));
+      }));
+    }));
+  })), ofArray([model.IsChecked ? button(new List$1(), ofArray(["a button"])) : tag(new List$1(), ofArray(["a tag"]))])));
 }
 function root$1(model, dispatch) {
   return docPage(ofArray([contentFromMarkdown(model.Intro), docSection("### Colors", root$2(colorInteractive, model.ColorViewer, function ($var1) {
@@ -8792,14 +9295,18 @@ function root$1(model, dispatch) {
     return dispatch(function (arg0_1) {
       return new Msg(1, arg0_1);
     }($var2));
-  })), docSection("\n### Styles\nThe checkbox can be **circle**.\n                            ", root$2(stylesInteractive, model.CircleViewer, function ($var3) {
+  })), docSection("\r\n### Styles\r\nThe checkbox can be **circle**.\r\n                            ", root$2(stylesInteractive, model.CircleViewer, function ($var3) {
     return dispatch(function (arg0_2) {
       return new Msg(2, arg0_2);
     }($var3));
-  })), docSection("### States", react_1("div", {})), docSection("### Extra", root$2(extraInteractive(model, dispatch), model.CircleViewer, function ($var4) {
+  })), docSection("### States", root$2(stateInteractive, model.StateViewer, function ($var4) {
     return dispatch(function (arg0_3) {
       return new Msg(2, arg0_3);
     }($var4));
+  })), docSection("### Event handler", root$2(extraInteractive(model, dispatch), model.CircleViewer, function ($var5) {
+    return dispatch(function (arg0_4) {
+      return new Msg(2, arg0_4);
+    }($var5));
   }))]));
 }
 
@@ -8810,7 +9317,7 @@ var Model$3 = function () {
   }
 
   babelHelpers.createClass(Model, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Home.Types.Model",
@@ -8843,7 +9350,7 @@ var Msg$2 = function () {
   }
 
   babelHelpers.createClass(Msg$$1, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "App.Types.Msg",
@@ -8872,7 +9379,7 @@ var ElementsModel = function () {
   }
 
   babelHelpers.createClass(ElementsModel, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "App.Types.ElementsModel",
@@ -8905,7 +9412,7 @@ var Model$2 = function () {
   }
 
   babelHelpers.createClass(Model$$1, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "App.Types.Model",
@@ -9212,7 +9719,7 @@ var Choice = function () {
             return compareUnions(this, other);
         }
     }, {
-        key: FSymbol.reflection,
+        key: _Symbol.reflection,
         value: function value() {
             return {
                 type: "Microsoft.FSharp.Core.FSharpChoice",
@@ -9414,9 +9921,99 @@ var MemberInfo = function () {
     }]);
     return MemberInfo;
 }();
-
+function resolveGeneric(idx, enclosing) {
+    try {
+        var t = enclosing.head;
+        if (t.generics == null) {
+            return resolveGeneric(idx, enclosing.tail);
+        } else {
+            var name = typeof idx === "string" ? idx : Object.getOwnPropertyNames(t.generics)[idx];
+            var resolved = t.generics[name];
+            if (resolved == null) {
+                return resolveGeneric(idx, enclosing.tail);
+            } else if (resolved instanceof NonDeclaredType && resolved.kind === "GenericParam") {
+                return resolveGeneric(resolved.definition, enclosing.tail);
+            } else {
+                return new List$1(resolved, enclosing);
+            }
+        }
+    } catch (err) {
+        throw new Error("Cannot resolve generic argument " + idx + ": " + err);
+    }
+}
 
 // TODO: This needs improvement, check namespace for non-custom types?
+function getTypeFullName(typ, option) {
+    function trim(fullName, opt) {
+        if (typeof fullName !== "string") {
+            return "unknown";
+        }
+        if (opt === "name") {
+            var i = fullName.lastIndexOf(".");
+            return fullName.substr(i + 1);
+        }
+        if (opt === "namespace") {
+            var _i = fullName.lastIndexOf(".");
+            return _i > -1 ? fullName.substr(0, _i) : "";
+        }
+        return fullName;
+    }
+    if (typeof typ === "string") {
+        return typ;
+    } else if (typ instanceof NonDeclaredType) {
+        switch (typ.kind) {
+            case "Unit":
+                return "unit";
+            case "Option":
+                return getTypeFullName(typ.generics[0], option) + " option";
+            case "Array":
+                return getTypeFullName(typ.generics[0], option) + "[]";
+            case "Tuple":
+                return typ.generics.map(function (x) {
+                    return getTypeFullName(x, option);
+                }).join(" * ");
+            case "Function":
+                return "Func<" + typ.generics.map(function (x) {
+                    return getTypeFullName(x, option);
+                }).join(", ") + ">";
+            case "GenericParam":
+            case "Interface":
+                return typ.definition;
+            case "GenericType":
+                return getTypeFullName(typ.definition, option);
+            case "Any":
+            default:
+                return "unknown";
+        }
+    } else {
+        // Attention: this doesn't work with Object.getPrototypeOf
+        var proto = typ.prototype;
+        return trim(typeof proto[_Symbol.reflection] === "function" ? proto[_Symbol.reflection]().type : null, option);
+    }
+}
+function getName(x) {
+    if (x instanceof MemberInfo) {
+        return x.name;
+    }
+    return getTypeFullName(x, "name");
+}
+
+
+
+
+function getUnionFields(obj, typ) {
+    if (obj != null && typeof obj[_Symbol.reflection] === "function") {
+        var info = obj[_Symbol.reflection]();
+        if (info.cases) {
+            var uci = info.cases[obj.tag];
+            if (uci != null) {
+                var fields = uci.length > 2 ? obj.data : uci.length > 1 ? [obj.data] : [];
+                return [new MemberInfo(uci[0], obj.tag, typ, null, uci.slice(1)), fields];
+            }
+        }
+    }
+    throw new Error("Not an F# union type.");
+}
 
 // tslint:disable:max-line-length
 // ----------------------------------------------
@@ -9739,6 +10336,19 @@ function tree_compare(comparer, s1, s2) {
         return s2.tag === 0 ? 1 : tree_compareStacks(comparer, ofArray([s1]), ofArray([s2]));
     }
 }
+function tree_mkFromEnumerator$1(comparer, acc, e) {
+    var cur = e.next();
+    while (!cur.done) {
+        acc = tree_add$1(comparer, cur.value, acc);
+        cur = e.next();
+    }
+    return acc;
+}
+function tree_ofSeq$1(comparer, c) {
+    var ie = c[Symbol.iterator]();
+    return tree_mkFromEnumerator$1(comparer, new SetTree(0), ie);
+}
+
 var FableSet = function () {
     /** Do not call, use Set.create instead. */
     function FableSet() {
@@ -9809,7 +10419,7 @@ var FableSet = function () {
             this.tree = new SetTree(0);
         }
     }, {
-        key: FSymbol.reflection,
+        key: _Symbol.reflection,
         value: function value() {
             return {
                 type: "Microsoft.FSharp.Collections.FSharpSet",
@@ -9824,6 +10434,17 @@ var FableSet = function () {
     }]);
     return FableSet;
 }();
+
+function from$1(comparer, tree) {
+    var s = new FableSet();
+    s.tree = tree;
+    s.comparer = comparer || new Comparer();
+    return s;
+}
+function create$4(ie, comparer) {
+    comparer = comparer || new Comparer();
+    return from$1(comparer, ie ? tree_ofSeq$1(comparer, ie) : new SetTree(0));
+}
 
 // tslint:disable:ban-types
 function deflate(v) {
@@ -9842,7 +10463,7 @@ function deflate(v) {
                 return o;
             }, {}, v);
         }
-        var reflectionInfo = typeof v[FSymbol.reflection] === "function" ? v[FSymbol.reflection]() : {};
+        var reflectionInfo = typeof v[_Symbol.reflection] === "function" ? v[_Symbol.reflection]() : {};
         if (reflectionInfo.properties) {
             return fold$1(function (o, prop) {
                 return o[prop] = v[prop], o;
@@ -9865,6 +10486,254 @@ function toJson(o) {
     return JSON.stringify(o, function (k, v) {
         return deflate(v);
     });
+}
+function combine(path1, path2) {
+    return typeof path2 === "number" ? path1 + "[" + path2 + "]" : (path1 ? path1 + "." : "") + path2;
+}
+function isNullable(typ) {
+    if (typeof typ === "string") {
+        return typ !== "boolean" && typ !== "number";
+    } else if (typ instanceof NonDeclaredType) {
+        return typ.kind !== "Array" && typ.kind !== "Tuple";
+    } else {
+        var info = typeof typ.prototype[_Symbol.reflection] === "function" ? typ.prototype[_Symbol.reflection]() : null;
+        return info ? info.nullable : true;
+    }
+}
+function invalidate(val, typ, path) {
+    throw new Error(fsFormat("%A", val) + " " + (path ? "(" + path + ")" : "") + " is not of type " + getTypeFullName(typ));
+}
+function needsInflate(enclosing) {
+    var typ = enclosing.head;
+    if (typeof typ === "string") {
+        return false;
+    }
+    if (typ instanceof NonDeclaredType) {
+        switch (typ.kind) {
+            case "Option":
+            case "Array":
+                return typ.definition != null || needsInflate(new List$1(typ.generics[0], enclosing));
+            case "Tuple":
+                return typ.generics.some(function (x) {
+                    return needsInflate(new List$1(x, enclosing));
+                });
+            case "Function":
+                return false;
+            case "GenericParam":
+                return needsInflate(resolveGeneric(typ.definition, enclosing.tail));
+            case "GenericType":
+                return true;
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+function inflateArray(arr, enclosing, path) {
+    if (!Array.isArray) {
+        invalidate(arr, "array", path);
+    }
+    // TODO: Validate non-inflated elements
+    return needsInflate(enclosing) ? arr.map(function (x, i) {
+        return inflate(x, enclosing, combine(path, i));
+    }) : arr;
+}
+function inflateMap(obj, keyEnclosing, valEnclosing, path) {
+    var inflateKey = keyEnclosing.head !== "string";
+    var inflateVal = needsInflate(valEnclosing);
+    return Object.getOwnPropertyNames(obj).map(function (k) {
+        var key = inflateKey ? inflate(JSON.parse(k), keyEnclosing, combine(path, k)) : k;
+        var val = inflateVal ? inflate(obj[k], valEnclosing, combine(path, k)) : obj[k];
+        return [key, val];
+    });
+}
+function inflateList(val, enclosing, path) {
+    var ar = [];
+    var li = new List$1();
+    var cur = val;
+    var inf = needsInflate(enclosing);
+    while (cur.tail != null) {
+        ar.push(inf ? inflate(cur.head, enclosing, path) : cur.head);
+        cur = cur.tail;
+    }
+    ar.reverse();
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = ar[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var a = _step.value;
+
+            li = new List$1(a, li);
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+
+    return li;
+}
+function inflateUnion(val, typ, info, path, inflateField) {
+    var caseName = void 0;
+    // Same shape as runtime DUs, for example, if they've been serialized with `JSON.stringify`
+    if (typeof val.tag === "number") {
+        return Object.assign(new typ(), val);
+    } else if (typeof val === "string") {
+        // Cases without fields are serialized as strings by `toJson`
+        caseName = val;
+    } else {
+        // Non-empty cases are serialized as `{ "MyCase": [1, 2] }` by `toJson`
+        caseName = Object.getOwnPropertyNames(val)[0];
+    }
+    // Locate case index
+    var tag = -1;
+    for (var i = 0; info.cases[i] != null; i++) {
+        if (info.cases[i][0] === caseName) {
+            tag = i;
+            break;
+        }
+    }
+    // Validate
+    if (tag === -1) {
+        invalidate(val, typ, path);
+    }
+    var caseInfo = info.cases[tag];
+    var inflatedData = void 0;
+    if (caseInfo.length > 2) {
+        inflatedData = [];
+        var data = val[caseName];
+        path = combine(path, caseName);
+        for (var _i = 0; _i < data.length; _i++) {
+            inflatedData.push(inflateField ? inflateField(data[_i], caseInfo[_i + 1], combine(path, _i)) : data[_i]);
+        }
+    } else if (caseInfo.length > 1) {
+        inflatedData = inflateField ? inflateField(val[caseName], caseInfo[1], combine(path, caseName)) : val[caseName];
+    }
+    return new typ(tag, inflatedData);
+}
+function inflate(val, typ, path) {
+    var enclosing = null;
+    if (typ instanceof List$1) {
+        enclosing = typ;
+        typ = typ.head;
+    } else {
+        enclosing = new List$1(typ, new List$1());
+    }
+    if (val == null) {
+        if (!isNullable(typ)) {
+            invalidate(val, typ, path);
+        }
+        return val;
+    } else if (typeof typ === "string") {
+        if ((typ === "boolean" || typ === "number" || typ === "string") && (typeof val === "undefined" ? "undefined" : _typeof(val)) !== typ) {
+            invalidate(val, typ, path);
+        }
+        return val;
+    } else if (typ instanceof NonDeclaredType) {
+        switch (typ.kind) {
+            case "Unit":
+                return null;
+            case "Option":
+                return inflate(val, new List$1(typ.generics[0], enclosing), path);
+            case "Array":
+                if (typ.definition != null) {
+                    return new typ.definition(val);
+                } else {
+                    return inflateArray(val, new List$1(typ.generics[0], enclosing), path);
+                }
+            case "Tuple":
+                return typ.generics.map(function (x, i) {
+                    return inflate(val[i], new List$1(x, enclosing), combine(path, i));
+                });
+            case "Function":
+                return val;
+            case "GenericParam":
+                return inflate(val, resolveGeneric(typ.definition, enclosing.tail), path);
+            case "GenericType":
+                var def = typ.definition;
+                if (def === List$1) {
+                    return Array.isArray(val) ? ofArray(inflateArray(val, resolveGeneric(0, enclosing), path)) : inflateList(val, resolveGeneric(0, enclosing), path);
+                }
+                // TODO: Should we try to inflate also sets and maps serialized with `JSON.stringify`?
+                if (def === FableSet) {
+                    return create$4(inflateArray(val, resolveGeneric(0, enclosing), path));
+                }
+                if (def === Set) {
+                    return new Set(inflateArray(val, resolveGeneric(0, enclosing), path));
+                }
+                if (def === FableMap) {
+                    return create(inflateMap(val, resolveGeneric(0, enclosing), resolveGeneric(1, enclosing), path));
+                }
+                if (def === Map) {
+                    return new Map(inflateMap(val, resolveGeneric(0, enclosing), resolveGeneric(1, enclosing), path));
+                }
+                return inflate(val, new List$1(typ.definition, enclosing), path);
+            default:
+                // case "Interface": // case "Any":
+                return val;
+        }
+    } else if (typeof typ === "function") {
+        if (typ === Date) {
+            return parse$1(val);
+        }
+        if (typeof typ.ofJSON === "function") {
+            return typ.ofJSON(val);
+        }
+        var info = typeof typ.prototype[_Symbol.reflection] === "function" ? typ.prototype[_Symbol.reflection]() : {};
+        // Union types
+        if (info.cases) {
+            return inflateUnion(val, typ, info, path, function (fi, t, p) {
+                return inflate(fi, new List$1(t, enclosing), path);
+            });
+        }
+        if (info.properties) {
+            var newObj = new typ();
+            var properties = info.properties;
+            var ks = Object.getOwnPropertyNames(properties);
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = ks[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var k = _step2.value;
+
+                    newObj[k] = inflate(val[k], new List$1(properties[k], enclosing), combine(path, k));
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+
+            return newObj;
+        }
+        return val;
+    }
+    throw new Error("Unexpected type when deserializing JSON: " + typ);
+}
+function inflatePublic(val, genArgs) {
+    return inflate(val, genArgs ? genArgs.T : null, "");
 }
 
 // TODO: Dates and types with `toJSON` are not adding the $type field
@@ -9999,7 +10868,7 @@ var Program = function () {
   }
 
   babelHelpers.createClass(Program, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Program",
@@ -23274,7 +24143,7 @@ var Components = function (__exports) {
   var LazyView = __exports.LazyView = function (_Component) {
     babelHelpers.inherits(LazyView, _Component);
     babelHelpers.createClass(LazyView, [{
-      key: FSymbol.reflection,
+      key: _Symbol.reflection,
       value: function value() {
         return extendInfo(LazyView, {
           type: "Elmish.React.Components.LazyView",
@@ -23412,7 +24281,7 @@ var Navigable = function () {
   }
 
   babelHelpers.createClass(Navigable, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Browser.Navigation.Navigable",
@@ -23543,7 +24412,7 @@ var Result = function () {
             return compareUnions(this, other);
         }
     }, {
-        key: FSymbol.reflection,
+        key: _Symbol.reflection,
         value: function value() {
             return {
                 type: "Microsoft.FSharp.Core.FSharpResult",
@@ -23585,7 +24454,7 @@ var State = function () {
   }
 
   babelHelpers.createClass(State, [{
-    key: FSymbol.reflection,
+    key: _Symbol.reflection,
     value: function value() {
       return {
         type: "Elmish.Browser.UrlParser.State",
@@ -23755,42 +24624,43 @@ function update$2(msg, model) {
   }
 }
 
-var colorCode = "\n```fsharp\n    Checkbox.checkbox [ ] [ str \"Button\" ]\n    Checkbox.checkbox [ Checkbox.isWhite ] [ str \"White\" ]\n    Checkbox.checkbox [ Checkbox.isLight ] [ str \"Light\" ]\n    Checkbox.checkbox [ Checkbox.isDark ] [ str \"Dark\" ]\n    Checkbox.checkbox [ Checkbox.isBlack ] [ str \"Black\" ]\n    Checkbox.checkbox [ Checkbox.isPrimary ] [ str \"Primary\" ]\n    Checkbox.checkbox [ Checkbox.isInfo ] [ str \"Info\" ]\n    Checkbox.checkbox [ Checkbox.isSuccess ] [ str \"Success\" ]\n    Checkbox.checkbox [ Checkbox.isWarning ] [ str \"Warning\" ]\n    Checkbox.checkbox [ Checkbox.isDanger ] [ str \"Danger\" ]\n```\n    ";
-var sizeCode = "\n```fsharp\n    Checkbox.checkbox [ Checkbox.isSmall ] [ str \"Small\" ]\n    Checkbox.checkbox [ ] [ str \"Normal\" ]\n    Checkbox.checkbox [ Checkbox.isMedium ] [ str \"Medium\" ]\n    Checkbox.checkbox [ Checkbox.isLarge ] [ str \"Large\" ]\n```\n    ";
-var circleCode = "\n```fsharp\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle ] [ str \"Checkbox\" ]\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isPrimary ] [ str \"Checkbox\" ]\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isSuccess ] [ str \"Checkbox - success\" ]\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isWarning ] [ str \"Checkbox - warning\" ]\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isDanger ] [ str \"Checkbox - danger\" ]\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isInfo ] [ str \"Checkbox - info\" ]\n```\n    ";
+var colorCode = "\r\n```fsharp\r\n    Checkbox.checkbox [ ] [ str \"Button\" ]\r\n    Checkbox.checkbox [ Checkbox.isWhite ] [ str \"White\" ]\r\n    Checkbox.checkbox [ Checkbox.isLight ] [ str \"Light\" ]\r\n    Checkbox.checkbox [ Checkbox.isDark ] [ str \"Dark\" ]\r\n    Checkbox.checkbox [ Checkbox.isBlack ] [ str \"Black\" ]\r\n    Checkbox.checkbox [ Checkbox.isPrimary ] [ str \"Primary\" ]\r\n    Checkbox.checkbox [ Checkbox.isInfo ] [ str \"Info\" ]\r\n    Checkbox.checkbox [ Checkbox.isSuccess ] [ str \"Success\" ]\r\n    Checkbox.checkbox [ Checkbox.isWarning ] [ str \"Warning\" ]\r\n    Checkbox.checkbox [ Checkbox.isDanger ] [ str \"Danger\" ]\r\n```\r\n    ";
+var sizeCode = "\r\n```fsharp\r\n    Checkbox.checkbox [ Checkbox.isSmall ] [ str \"Small\" ]\r\n    Checkbox.checkbox [ ] [ str \"Normal\" ]\r\n    Checkbox.checkbox [ Checkbox.isMedium ] [ str \"Medium\" ]\r\n    Checkbox.checkbox [ Checkbox.isLarge ] [ str \"Large\" ]\r\n```\r\n    ";
+var circleCode = "\r\n```fsharp\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle ] [ str \"Checkbox\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isPrimary ] [ str \"Checkbox\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isSuccess ] [ str \"Checkbox - success\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isWarning ] [ str \"Checkbox - warning\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isDanger ] [ str \"Checkbox - danger\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isInfo ] [ str \"Checkbox - info\" ]\r\n```\r\n    ";
 
+var stateCode = "\r\n```fsharp\r\n    Checkbox.checkbox [ Checkbox.isDisabled ] [ str \"Disabled\" ]\r\n    Checkbox.checkbox [ ] [ str \"Unchecked\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked;] [ str \"checked\" ]\r\n```\r\n    ";
 
-
-var intro = "\n# Checkbox\n\nThe **Checkbox** can have different colors, sizes and states.\n\n*[bulma-checkradio documentation](https://github.com/Wikiki/bulma-checkradio)*\n        ";
+var intro = "\r\n# Checkbox\r\n\r\nThe **Checkbox** can have different colors, sizes and states.\r\n\r\n*[bulma-checkradio documentation](https://github.com/Wikiki/bulma-checkradio)*\r\n        ";
 function init$1() {
   var ColorViewer = init$2(colorCode);
   var SizeViewer = init$2(sizeCode);
   var CircleViewer = init$2(circleCode);
-  return new Model(intro, ColorViewer, SizeViewer, CircleViewer, false);
+  var StateViewer = init$2(stateCode);
+  return new Model(intro, ColorViewer, SizeViewer, CircleViewer, StateViewer, false);
 }
 function update$1(msg, model) {
   if (msg.tag === 1) {
     var patternInput = update$2(msg.data, model.SizeViewer);
-    return [new Model(model.Intro, model.ColorViewer, patternInput[0], model.CircleViewer, model.IsChecked), Cmd.map(function (arg0) {
+    return [new Model(model.Intro, model.ColorViewer, patternInput[0], model.CircleViewer, model.StateViewer, model.IsChecked), Cmd.map(function (arg0) {
       return new Msg(1, arg0);
     }, patternInput[1])];
   } else if (msg.tag === 2) {
     var patternInput_1 = update$2(msg.data, model.CircleViewer);
-    return [new Model(model.Intro, model.ColorViewer, model.SizeViewer, patternInput_1[0], model.IsChecked), Cmd.map(function (arg0_1) {
+    return [new Model(model.Intro, model.ColorViewer, model.SizeViewer, patternInput_1[0], model.StateViewer, model.IsChecked), Cmd.map(function (arg0_1) {
       return new Msg(2, arg0_1);
     }, patternInput_1[1])];
   } else if (msg.tag === 3) {
-    return [new Model(model.Intro, model.ColorViewer, model.SizeViewer, model.CircleViewer, msg.data), Cmd.none()];
+    return [new Model(model.Intro, model.ColorViewer, model.SizeViewer, model.CircleViewer, model.StateViewer, msg.data), Cmd.none()];
   } else {
     var patternInput_2 = update$2(msg.data, model.ColorViewer);
-    return [new Model(model.Intro, patternInput_2[0], model.SizeViewer, model.CircleViewer, model.IsChecked), Cmd.map(function (arg0_2) {
+    return [new Model(model.Intro, patternInput_2[0], model.SizeViewer, model.CircleViewer, model.StateViewer, model.IsChecked), Cmd.map(function (arg0_2) {
       return new Msg(0, arg0_2);
     }, patternInput_2[1])];
   }
 }
 
 function init$3() {
-  return new Model$3("\n# Fable.Elmish.Bulma\n\nProvide a wrapper around [Bulma](http://bulma.io/) for [Elmish](https://fable-elmish.github.io/).\n\nThis website isn't intended into providing a full documentation of Bulma.\n\nIt's only serve as a documentation of the wrapper and also test that the wrappers are working as this website is build with Fable.Elmish.Bulma itself.\n\n---\n\n## How to install ?\n\nAdd `Fable.Elmish.Bulma` dependence into your paket files.\n\n```\n// paket.denpendencies\nnuget Fable.Elmish.Bulma\n\n// paket.reference\nFable.Elmish.Bulma\n```\n\nRun `paket.exe update` at your project root and then `dotnet restore` on your `*.fsproj` file.\n\nYou are ready to start using Fable.Elmish.Bulma. You can confirm it by trying to open `Elmish.Bulma` namespace.\n\n```fsharp\nopen Elmish.Bulma\n```\n\n## Architecture\n\nFable.Elmish.Bulma has been designed to provide the best experience over the Bulma CSS framework.\nTo archieve this goal, we assume the user to follow some conventions.\n\nAlways open the \"global\" module and not the lower module of the hierachie. For example, if you want to use the Button element you should follow this code:\n\n```fsharp\nopen Elmish.Bulma.Elements\n\nButton.button [ Button.isSmall ]\n    [ str \"A button\" ]\n```\n\nEvery function follow the \"React DSL\":\n\n1. Name of the element\n2. List of properties\n3. Children\n\nFable.Elmish.Bulma do not only provide wrappers around Bulma but also intellisense the classes provied.\n\nFor example, here is how to access the \"is-hidden\" class.\n\n```fsharp\n\nopen Elmish.Bulma.BulmaClasses\n\nBulma.Properties.Visibility.IsHidden\n\n```\n\nAll the compoments documented into this website, are available into the library.\n\n   ");
+  return new Model$3("\r\n# Fable.Elmish.Bulma\r\n\r\nProvide a wrapper around [Bulma](http://bulma.io/) for [Elmish](https://fable-elmish.github.io/).\r\n\r\nThis website isn't intended into providing a full documentation of Bulma.\r\n\r\nIt's only serve as a documentation of the wrapper and also test that the wrappers are working as this website is build with Fable.Elmish.Bulma itself.\r\n\r\n---\r\n\r\n## How to install ?\r\n\r\nAdd `Fable.Elmish.Bulma` dependence into your paket files.\r\n\r\n```\r\n// paket.denpendencies\r\nnuget Fable.Elmish.Bulma\r\n\r\n// paket.reference\r\nFable.Elmish.Bulma\r\n```\r\n\r\nRun `paket.exe update` at your project root and then `dotnet restore` on your `*.fsproj` file.\r\n\r\nYou are ready to start using Fable.Elmish.Bulma. You can confirm it by trying to open `Elmish.Bulma` namespace.\r\n\r\n```fsharp\r\nopen Elmish.Bulma\r\n```\r\n\r\n## Architecture\r\n\r\nFable.Elmish.Bulma has been designed to provide the best experience over the Bulma CSS framework.\r\nTo archieve this goal, we assume the user to follow some conventions.\r\n\r\nAlways open the \"global\" module and not the lower module of the hierachie. For example, if you want to use the Button element you should follow this code:\r\n\r\n```fsharp\r\nopen Elmish.Bulma.Elements\r\n\r\nButton.button [ Button.isSmall ]\r\n    [ str \"A button\" ]\r\n```\r\n\r\nEvery function follow the \"React DSL\":\r\n\r\n1. Name of the element\r\n2. List of properties\r\n3. Children\r\n\r\nFable.Elmish.Bulma do not only provide wrappers around Bulma but also intellisense the classes provied.\r\n\r\nFor example, here is how to access the \"is-hidden\" class.\r\n\r\n```fsharp\r\n\r\nopen Elmish.Bulma.BulmaClasses\r\n\r\nBulma.Properties.Visibility.IsHidden\r\n\r\n```\r\n\r\nAll the compoments documented into this website, are available into the library.\r\n\r\n   ");
 }
 
 var pageParser = function () {
@@ -23835,6 +24705,4254 @@ function update(msg, model) {
     return new Msg$2(0, arg0);
   }, patternInput[1])];
 }
+
+var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+
+
+
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var pathGetter_1 = pathGetter;
+
+function pathGetter(obj, path) {
+  if (path !== '$') {
+    var paths = getPaths(path);
+    for (var i = 0; i < paths.length; i++) {
+      path = paths[i].toString().replace(/\\"/g, '"');
+      if (typeof obj[path] === 'undefined' && i !== paths.length - 1) continue;
+      obj = obj[path];
+    }
+  }
+  return obj;
+}
+
+function getPaths(pathString) {
+  var regex = /(?:\.(\w+))|(?:\[(\d+)\])|(?:\["((?:[^\\"]|\\.)*)"\])/g;
+  var matches = [];
+  var match;
+  while (match = regex.exec(pathString)) {
+    matches.push( match[1] || match[2] || match[3] );
+  }
+  return matches;
+}
+
+var getRegexFlags = function getRegexFlags(regex) {
+  var flags = '';
+  if (regex.ignoreCase) flags += 'i';
+  if (regex.global) flags += 'g';
+  if (regex.multiline) flags += 'm';
+  return flags;
+};
+
+var stringifyFunction = function stringifyFunction(fn, customToString) {
+  if (typeof customToString === 'function') {
+    return customToString(fn);
+  }
+  var str = fn.toString();
+  var match = str.match(/^[^{]*{|^[^=]*=>/);
+  var start = match ? match[0] : '<function> ';
+  var end = str[str.length - 1] === '}' ? '}' : '';
+  return start.replace(/\r\n|\n/g, ' ').replace(/\s+/g, ' ') + ' /* ... */ ' + end;
+};
+
+var restore = function restore(obj, root) {
+  var type = obj[0];
+  var rest = obj.slice(1);
+  switch(type) {
+    case '$':
+      return pathGetter_1(root, obj);
+    case 'r':
+      var comma = rest.indexOf(',');
+      var flags = rest.slice(0, comma);
+      var source = rest.slice(comma + 1);
+      return RegExp(source, flags);
+    case 'd':
+      return new Date(+rest);
+    case 'f':
+      var fn = function() { throw new Error("can't run jsan parsed function") };
+      fn.toString = function() { return rest; };
+      return fn;
+    case 'u':
+      return undefined;
+    case 'e':
+      var error = new Error(rest);
+      error.stack = 'Stack is unavailable for jsan parsed errors';
+      return error;
+    case 's':
+      return Symbol(rest);
+    case 'g':
+      return Symbol.for(rest);
+    case 'm':
+      return new Map(index$8.parse(rest));
+    case 'l':
+      return new Set(index$8.parse(rest));
+    case 'n':
+      return NaN;
+    case 'i':
+      return Infinity;
+    case 'y':
+      return -Infinity;
+    default:
+      console.warn('unknown type', obj);
+      return obj;
+  }
+};
+
+var utils = {
+	getRegexFlags: getRegexFlags,
+	stringifyFunction: stringifyFunction,
+	restore: restore
+};
+
+var WMap = typeof WeakMap !== 'undefined'?
+  WeakMap:
+  function() {
+    var keys = [];
+    var values = [];
+    return {
+      set: function(key, value) {
+        keys.push(key);
+        values.push(value);
+      },
+      get: function(key) {
+        for (var i = 0; i < keys.length; i++) {
+          if (keys[i] === key) {
+            return values[i];
+          }
+        }
+      }
+    }
+  };
+
+// Based on https://github.com/douglascrockford/JSON-js/blob/master/cycle.js
+
+var decycle = function decycle(object, options, replacer) {
+  'use strict';
+
+  var map = new WMap();
+
+  var hasCircular = Object.prototype.hasOwnProperty.call(options, 'circular');
+
+  return (function derez(_value, path, key) {
+
+    // The derez recurses through the object, producing the deep copy.
+
+    var i,        // The loop counter
+      name,       // Property name
+      nu;         // The new object or array
+
+    // typeof null === 'object', so go on if this value is really an object but not
+    // one of the weird builtin objects.
+
+    var value = replacer ? replacer(key || '', _value) : _value;
+
+    if (options.date && value instanceof Date) {
+      return {$jsan: 'd' + value.getTime()};
+    }
+    if (options.regex && value instanceof RegExp) {
+      return {$jsan: 'r' + utils.getRegexFlags(value) + ',' + value.source};
+    }
+    if (options['function'] && typeof value === 'function') {
+      return {$jsan: 'f' + utils.stringifyFunction(value, options['function'])}
+    }
+    if (options['nan'] && typeof value === 'number' && isNaN(value)) {
+      return {$jsan: 'n'}
+    }
+    if (options['infinity']) {
+      if (Number.POSITIVE_INFINITY === value) return {$jsan: 'i'}
+      if (Number.NEGATIVE_INFINITY === value) return {$jsan: 'y'}
+    }
+    if (options['undefined'] && value === undefined) {
+      return {$jsan: 'u'}
+    }
+    if (options['error'] && value instanceof Error) {
+      return {$jsan: 'e' + value.message}
+    }
+    if (options['symbol'] && typeof value === 'symbol') {
+      var symbolKey = Symbol.keyFor(value);
+      if (symbolKey !== undefined) {
+        return {$jsan: 'g' + symbolKey}
+      }
+
+      // 'Symbol(foo)'.slice(7, -1) === 'foo'
+      return {$jsan: 's' + value.toString().slice(7, -1)}
+    }
+
+    if (options['map'] && typeof Map === 'function' && value instanceof Map && typeof Array.from === 'function') {
+      return {$jsan: 'm' + JSON.stringify(decycle(Array.from(value), options, replacer))}
+    }
+
+    if (options['set'] && typeof Set === 'function' && value instanceof Set && typeof Array.from === 'function') {
+      return {$jsan: 'l' + JSON.stringify(decycle(Array.from(value), options, replacer))}
+    }
+
+    if (value && typeof value.toJSON === 'function') {
+      value = value.toJSON(key);
+    }
+
+    if (typeof value === 'object' && value !== null &&
+      !(value instanceof Boolean) &&
+      !(value instanceof Date)    &&
+      !(value instanceof Number)  &&
+      !(value instanceof RegExp)  &&
+      !(value instanceof String)  &&
+      !(typeof value === 'symbol')  &&
+      !(value instanceof Error)) {
+
+        // If the value is an object or array, look to see if we have already
+        // encountered it. If so, return a $ref/path object.
+
+      if (typeof value === 'object' && value !== null) {
+        var foundPath = map.get(value);
+        if (foundPath) {
+          if (hasCircular && path.indexOf(foundPath) === 0) {
+            return typeof options.circular === 'function'?
+              options.circular(value, path, foundPath):
+              options.circular;
+          }
+          return {$jsan: foundPath};
+        }
+        map.set(value, path);
+      }
+
+
+      // If it is an array, replicate the array.
+
+      if (Object.prototype.toString.apply(value) === '[object Array]') {
+          nu = [];
+          for (i = 0; i < value.length; i += 1) {
+              nu[i] = derez(value[i], path + '[' + i + ']', i);
+          }
+      } else {
+
+        // If it is an object, replicate the object.
+
+        nu = {};
+        for (name in value) {
+          if (Object.prototype.hasOwnProperty.call(value, name)) {
+            var nextPath = /^\w+$/.test(name) ?
+              '.' + name :
+              '[' + JSON.stringify(name) + ']';
+            nu[name] = name === '$jsan' ? [derez(value[name], path + nextPath)] : derez(value[name], path + nextPath, name);
+          }
+        }
+      }
+      return nu;
+    }
+    return value;
+  }(object, '$'));
+};
+
+
+var retrocycle = function retrocycle($) {
+  'use strict';
+
+
+  return (function rez(value) {
+
+    // The rez function walks recursively through the object looking for $jsan
+    // properties. When it finds one that has a value that is a path, then it
+    // replaces the $jsan object with a reference to the value that is found by
+    // the path.
+
+    var i, item, name, path;
+
+    if (value && typeof value === 'object') {
+      if (Object.prototype.toString.apply(value) === '[object Array]') {
+        for (i = 0; i < value.length; i += 1) {
+          item = value[i];
+          if (item && typeof item === 'object') {
+            if (item.$jsan) {
+              value[i] = utils.restore(item.$jsan, $);
+            } else {
+              rez(item);
+            }
+          }
+        }
+      } else {
+        for (name in value) {
+          // base case passed raw object
+          if(typeof value[name] === 'string' && name === '$jsan'){
+            return utils.restore(value.$jsan, $);
+            break;
+          }
+          else {
+            if (name === '$jsan') {
+              value[name] = value[name][0];
+            }
+            if (typeof value[name] === 'object') {
+              item = value[name];
+              if (item && typeof item === 'object') {
+                if (item.$jsan) {
+                  value[name] = utils.restore(item.$jsan, $);
+                } else {
+                  rez(item);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return value;
+  }($));
+};
+
+var cycle = {
+	decycle: decycle,
+	retrocycle: retrocycle
+};
+
+var stringify = function stringify(value, replacer, space, _options) {
+
+  if (arguments.length < 4) {
+    try {
+      if (arguments.length === 1) {
+        return JSON.stringify(value);
+      } else {
+        return JSON.stringify.apply(JSON, arguments);
+      }
+    } catch (e) {}
+  }
+
+  var options = _options || false;
+  if (typeof options === 'boolean') {
+    options = {
+      'date': options,
+      'function': options,
+      'regex': options,
+      'undefined': options,
+      'error': options,
+      'symbol': options,
+      'map': options,
+      'set': options,
+      'nan': options,
+      'infinity': options
+    };
+  }
+
+  var decycled = cycle.decycle(value, options, replacer);
+  if (arguments.length === 1) {
+    return JSON.stringify(decycled);
+  } else {
+    return JSON.stringify(decycled, replacer, space);
+  }
+
+};
+
+var parse$4 = function parse(text, reviver) {
+  var needsRetrocycle = /"\$jsan"/.test(text);
+  var parsed;
+  if (arguments.length === 1) {
+    parsed = JSON.parse(text);
+  } else {
+    parsed = JSON.parse(text, reviver);
+  }
+  if (needsRetrocycle) {
+    parsed = cycle.retrocycle(parsed);
+  }
+  return parsed;
+};
+
+var index$8 = {
+	stringify: stringify,
+	parse: parse$4
+};
+
+var index$6 = index$8;
+
+/**
+ * Expose `Emitter`.
+ */
+
+var index$14 = Emitter;
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+}
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  function on() {
+    this.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks['$' + event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks['$' + event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks['$' + event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks['$' + event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+var create$5 = (function () {
+  function F() {}
+
+  return function (o) {
+    if (arguments.length != 1) {
+      throw new Error('Object.create implementation only accepts one parameter.');
+    }
+    F.prototype = o;
+    return new F();
+  }
+})();
+
+var objectcreate = {
+	create: create$5
+};
+
+if (!Object.create) {
+  Object.create = objectcreate;
+}
+
+var SCEmitter$2 = function () {
+  index$14.call(this);
+};
+
+SCEmitter$2.prototype = Object.create(index$14.prototype);
+
+SCEmitter$2.prototype.emit = function (event) {
+  if (event == 'error') {
+
+    // To work with sc-domain.
+    // See https://github.com/SocketCluster/sc-domain
+    var domainErrorArgs = ['__domainError'];
+    if (arguments[1] !== undefined) {
+      domainErrorArgs.push(arguments[1]);
+    }
+
+    index$14.prototype.emit.apply(this, domainErrorArgs);
+
+    if (this.domain) {
+      // Emit the error on the domain if it has one.
+      // See https://github.com/joyent/node/blob/ef4344311e19a4f73c031508252b21712b22fe8a/lib/events.js#L78-85
+
+      var err = arguments[1];
+
+      if (!err) {
+        err = new Error('Uncaught, unspecified "error" event.');
+      }
+      err.domainEmitter = this;
+      err.domain = this.domain;
+      err.domainThrown = false;
+      this.domain.emit('error', err);
+    }
+  }
+  index$14.prototype.emit.apply(this, arguments);
+};
+
+var SCEmitter_1 = SCEmitter$2;
+
+var index$12 = {
+	SCEmitter: SCEmitter_1
+};
+
+var SCEmitter$3 = index$12.SCEmitter;
+
+var SCChannel$1 = function (name, client, options) {
+  var self = this;
+
+  SCEmitter$3.call(this);
+
+  this.PENDING = 'pending';
+  this.SUBSCRIBED = 'subscribed';
+  this.UNSUBSCRIBED = 'unsubscribed';
+
+  this.name = name;
+  this.state = this.UNSUBSCRIBED;
+  this.client = client;
+
+  this.options = options || {};
+  this.setOptions(this.options);
+};
+
+SCChannel$1.prototype = Object.create(SCEmitter$3.prototype);
+
+SCChannel$1.prototype.setOptions = function (options) {
+  if (!options) {
+    options = {};
+  }
+  this.waitForAuth = options.waitForAuth || false;
+  if (options.data !== undefined) {
+    this.data = options.data;
+  }
+};
+
+SCChannel$1.prototype.getState = function () {
+  return this.state;
+};
+
+SCChannel$1.prototype.subscribe = function (options) {
+  this.client.subscribe(this.name, options);
+};
+
+SCChannel$1.prototype.unsubscribe = function () {
+  this.client.unsubscribe(this.name);
+};
+
+SCChannel$1.prototype.isSubscribed = function (includePending) {
+  return this.client.isSubscribed(this.name, includePending);
+};
+
+SCChannel$1.prototype.publish = function (data, callback) {
+  this.client.publish(this.name, data, callback);
+};
+
+SCChannel$1.prototype.watch = function (handler) {
+  this.client.watch(this.name, handler);
+};
+
+SCChannel$1.prototype.unwatch = function (handler) {
+  this.client.unwatch(this.name, handler);
+};
+
+SCChannel$1.prototype.watchers = function () {
+  return this.client.watchers(this.name);
+};
+
+SCChannel$1.prototype.destroy = function () {
+  this.client.destroyChannel(this.name);
+};
+
+var SCChannel_1 = SCChannel$1;
+
+var index$16 = {
+	SCChannel: SCChannel_1
+};
+
+// Based on https://github.com/dscape/cycle/blob/master/cycle.js
+
+var decycle$1 = function decycle(object) {
+// Make a deep copy of an object or array, assuring that there is at most
+// one instance of each object or array in the resulting structure. The
+// duplicate references (which might be forming cycles) are replaced with
+// an object of the form
+//      {$ref: PATH}
+// where the PATH is a JSONPath string that locates the first occurance.
+// So,
+//      var a = [];
+//      a[0] = a;
+//      return JSON.stringify(JSON.decycle(a));
+// produces the string '[{"$ref":"$"}]'.
+
+// JSONPath is used to locate the unique object. $ indicates the top level of
+// the object or array. [NUMBER] or [STRING] indicates a child member or
+// property.
+
+    var objects = [],   // Keep a reference to each unique object or array
+        paths = [];     // Keep the path to each unique object or array
+
+    return (function derez(value, path) {
+
+// The derez recurses through the object, producing the deep copy.
+
+        var i,          // The loop counter
+            name,       // Property name
+            nu;         // The new object or array
+
+// typeof null === 'object', so go on if this value is really an object but not
+// one of the weird builtin objects.
+
+        if (typeof value === 'object' && value !== null &&
+                !(value instanceof Boolean) &&
+                !(value instanceof Date)    &&
+                !(value instanceof Number)  &&
+                !(value instanceof RegExp)  &&
+                !(value instanceof String)) {
+
+// If the value is an object or array, look to see if we have already
+// encountered it. If so, return a $ref/path object. This is a hard way,
+// linear search that will get slower as the number of unique objects grows.
+
+            for (i = 0; i < objects.length; i += 1) {
+                if (objects[i] === value) {
+                    return {$ref: paths[i]};
+                }
+            }
+
+// Otherwise, accumulate the unique value and its path.
+
+            objects.push(value);
+            paths.push(path);
+
+// If it is an array, replicate the array.
+
+            if (Object.prototype.toString.apply(value) === '[object Array]') {
+                nu = [];
+                for (i = 0; i < value.length; i += 1) {
+                    nu[i] = derez(value[i], path + '[' + i + ']');
+                }
+            } else {
+
+// If it is an object, replicate the object.
+
+                nu = {};
+                for (name in value) {
+                    if (Object.prototype.hasOwnProperty.call(value, name)) {
+                        nu[name] = derez(value[name],
+                            path + '[' + JSON.stringify(name) + ']');
+                    }
+                }
+            }
+            return nu;
+        }
+        return value;
+    }(object, '$'));
+};
+
+var isStrict = (function () { return !this; })();
+
+function AuthTokenExpiredError(message, expiry) {
+  this.name = 'AuthTokenExpiredError';
+  this.message = message;
+  this.expiry = expiry;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+AuthTokenExpiredError.prototype = Object.create(Error.prototype);
+
+
+function AuthTokenInvalidError(message) {
+  this.name = 'AuthTokenInvalidError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+AuthTokenInvalidError.prototype = Object.create(Error.prototype);
+
+
+function AuthTokenNotBeforeError(message, date) {
+  this.name = 'AuthTokenNotBeforeError';
+  this.message = message;
+  this.date = date;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+AuthTokenNotBeforeError.prototype = Object.create(Error.prototype);
+
+
+// For any other auth token error.
+function AuthTokenError(message) {
+  this.name = 'AuthTokenError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+AuthTokenError.prototype = Object.create(Error.prototype);
+
+
+function SilentMiddlewareBlockedError(message, type) {
+  this.name = 'SilentMiddlewareBlockedError';
+  this.message = message;
+  this.type = type;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+SilentMiddlewareBlockedError.prototype = Object.create(Error.prototype);
+
+
+function InvalidActionError$1(message) {
+  this.name = 'InvalidActionError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+InvalidActionError$1.prototype = Object.create(Error.prototype);
+
+function InvalidArgumentsError$1(message) {
+  this.name = 'InvalidArgumentsError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+InvalidArgumentsError$1.prototype = Object.create(Error.prototype);
+
+function InvalidOptionsError(message) {
+  this.name = 'InvalidOptionsError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+InvalidOptionsError.prototype = Object.create(Error.prototype);
+
+
+function InvalidMessageError$1(message) {
+  this.name = 'InvalidMessageError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+InvalidMessageError$1.prototype = Object.create(Error.prototype);
+
+
+function SocketProtocolError$1(message, code) {
+  this.name = 'SocketProtocolError';
+  this.message = message;
+  this.code = code;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+SocketProtocolError$1.prototype = Object.create(Error.prototype);
+
+
+function ServerProtocolError(message) {
+  this.name = 'ServerProtocolError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+ServerProtocolError.prototype = Object.create(Error.prototype);
+
+function HTTPServerError(message) {
+  this.name = 'HTTPServerError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+HTTPServerError.prototype = Object.create(Error.prototype);
+
+
+function ResourceLimitError(message) {
+  this.name = 'ResourceLimitError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+ResourceLimitError.prototype = Object.create(Error.prototype);
+
+
+function TimeoutError$1(message) {
+  this.name = 'TimeoutError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+TimeoutError$1.prototype = Object.create(Error.prototype);
+
+
+function BadConnectionError(message, type) {
+  this.name = 'BadConnectionError';
+  this.message = message;
+  this.type = type;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+BadConnectionError.prototype = Object.create(Error.prototype);
+
+
+function BrokerError(message) {
+  this.name = 'BrokerError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+BrokerError.prototype = Object.create(Error.prototype);
+
+
+function ProcessExitError(message, code) {
+  this.name = 'ProcessExitError';
+  this.message = message;
+  this.code = code;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+ProcessExitError.prototype = Object.create(Error.prototype);
+
+
+function UnknownError(message) {
+  this.name = 'UnknownError';
+  this.message = message;
+  if (Error.captureStackTrace && !isStrict) {
+    Error.captureStackTrace(this, arguments.callee);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+}
+UnknownError.prototype = Object.create(Error.prototype);
+
+
+// Expose all error types
+
+var index$18 = {
+  AuthTokenExpiredError: AuthTokenExpiredError,
+  AuthTokenInvalidError: AuthTokenInvalidError,
+  AuthTokenNotBeforeError: AuthTokenNotBeforeError,
+  AuthTokenError: AuthTokenError,
+  SilentMiddlewareBlockedError: SilentMiddlewareBlockedError,
+  InvalidActionError: InvalidActionError$1,
+  InvalidArgumentsError: InvalidArgumentsError$1,
+  InvalidOptionsError: InvalidOptionsError,
+  InvalidMessageError: InvalidMessageError$1,
+  SocketProtocolError: SocketProtocolError$1,
+  ServerProtocolError: ServerProtocolError,
+  HTTPServerError: HTTPServerError,
+  ResourceLimitError: ResourceLimitError,
+  TimeoutError: TimeoutError$1,
+  BadConnectionError: BadConnectionError,
+  BrokerError: BrokerError,
+  ProcessExitError: ProcessExitError,
+  UnknownError: UnknownError
+};
+
+var socketProtocolErrorStatuses = {
+  1001: 'Socket was disconnected',
+  1002: 'A WebSocket protocol error was encountered',
+  1003: 'Server terminated socket because it received invalid data',
+  1005: 'Socket closed without status code',
+  1006: 'Socket hung up',
+  1007: 'Message format was incorrect',
+  1008: 'Encountered a policy violation',
+  1009: 'Message was too big to process',
+  1010: 'Client ended the connection because the server did not comply with extension requirements',
+  1011: 'Server encountered an unexpected fatal condition',
+  4000: 'Server ping timed out',
+  4001: 'Client pong timed out',
+  4002: 'Server failed to sign auth token',
+  4003: 'Failed to complete handshake',
+  4004: 'Client failed to save auth token',
+  4005: 'Did not receive #handshake from client before timeout',
+  4006: 'Failed to bind socket to message broker',
+  4007: 'Client connection establishment timed out'
+};
+
+var socketProtocolIgnoreStatuses = {
+  1000: 'Socket closed normally',
+  1001: 'Socket hung up'
+};
+
+// Properties related to error domains cannot be serialized.
+var unserializableErrorProperties = {
+  domain: 1,
+  domainEmitter: 1,
+  domainThrown: 1
+};
+
+var dehydrateError = function (error, includeStackTrace) {
+  var dehydratedError;
+
+  if (error && typeof error == 'object') {
+    dehydratedError = {
+      message: error.message
+    };
+    if (includeStackTrace) {
+      dehydratedError.stack = error.stack;
+    }
+    for (var i in error) {
+      if (!unserializableErrorProperties[i]) {
+        dehydratedError[i] = error[i];
+      }
+    }
+  } else if (typeof error == 'function') {
+    dehydratedError = '[function ' + (error.name || 'anonymous') + ']';
+  } else {
+    dehydratedError = error;
+  }
+
+  return decycle$1(dehydratedError);
+};
+
+var hydrateError = function (error) {
+  var hydratedError = null;
+  if (error != null) {
+    if (typeof error == 'object') {
+      hydratedError = new Error(error.message);
+      for (var i in error) {
+        if (error.hasOwnProperty(i)) {
+          hydratedError[i] = error[i];
+        }
+      }
+    } else {
+      hydratedError = error;
+    }
+  }
+  return hydratedError;
+};
+
+var decycle_1 = decycle$1;
+
+index$18.socketProtocolErrorStatuses = socketProtocolErrorStatuses;
+index$18.socketProtocolIgnoreStatuses = socketProtocolIgnoreStatuses;
+index$18.dehydrateError = dehydrateError;
+index$18.hydrateError = hydrateError;
+index$18.decycle = decycle_1;
+
+var InvalidActionError = index$18.InvalidActionError;
+
+var Response$1 = function (socket, id) {
+  this.socket = socket;
+  this.id = id;
+  this.sent = false;
+};
+
+Response$1.prototype._respond = function (responseData) {
+  if (this.sent) {
+    throw new InvalidActionError('Response ' + this.id + ' has already been sent');
+  } else {
+    this.sent = true;
+    this.socket.send(this.socket.encode(responseData));
+  }
+};
+
+Response$1.prototype.end = function (data) {
+  if (this.id) {
+    var responseData = {
+      rid: this.id
+    };
+    if (data !== undefined) {
+      responseData.data = data;
+    }
+    this._respond(responseData);
+  }
+};
+
+Response$1.prototype.error = function (error, data) {
+  if (this.id) {
+    var err = index$18.dehydrateError(error);
+
+    var responseData = {
+      rid: this.id,
+      error: err
+    };
+    if (data !== undefined) {
+      responseData.data = data;
+    }
+
+    this._respond(responseData);
+  }
+};
+
+Response$1.prototype.callback = function (error, data) {
+  if (error) {
+    this.error(error, data);
+  } else {
+    this.end(data);
+  }
+};
+
+var Response_1 = Response$1;
+
+var response = {
+	Response: Response_1
+};
+
+var AuthEngine$1 = function () {
+  this._internalStorage = {};
+};
+
+AuthEngine$1.prototype._isLocalStorageEnabled = function () {
+  var err;
+  try {
+    // Some browsers will throw an error here if localStorage is disabled.
+    commonjsGlobal.localStorage;
+    
+    // Safari, in Private Browsing Mode, looks like it supports localStorage but all calls to setItem
+    // throw QuotaExceededError. We're going to detect this and avoid hard to debug edge cases.
+    commonjsGlobal.localStorage.setItem('__scLocalStorageTest', 1);
+    commonjsGlobal.localStorage.removeItem('__scLocalStorageTest');
+  } catch (e) {
+    err = e;
+  }
+  return !err;
+};
+
+AuthEngine$1.prototype.saveToken = function (name, token, options, callback) {
+  if (this._isLocalStorageEnabled() && commonjsGlobal.localStorage) {
+    commonjsGlobal.localStorage.setItem(name, token);
+  } else {
+    this._internalStorage[name] = token;
+  }
+  callback && callback(null, token);
+};
+
+AuthEngine$1.prototype.removeToken = function (name, callback) {
+  var token;
+
+  this.loadToken(name, function (err, authToken) {
+    token = authToken;
+  });
+
+  if (this._isLocalStorageEnabled() && commonjsGlobal.localStorage) {
+    commonjsGlobal.localStorage.removeItem(name);
+  }
+  delete this._internalStorage[name];
+
+  callback && callback(null, token);
+};
+
+AuthEngine$1.prototype.loadToken = function (name, callback) {
+  var token;
+
+  if (this._isLocalStorageEnabled() && commonjsGlobal.localStorage) {
+    token = commonjsGlobal.localStorage.getItem(name);
+  } else {
+    token = this._internalStorage[name] || null;
+  }
+  callback(null, token);
+};
+
+var AuthEngine_1 = AuthEngine$1;
+
+var auth = {
+	AuthEngine: AuthEngine_1
+};
+
+var base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+var arrayBufferToBase64 = function (arraybuffer) {
+  var bytes = new Uint8Array(arraybuffer);
+  var len = bytes.length;
+  var base64 = '';
+
+  for (var i = 0; i < len; i += 3) {
+    base64 += base64Chars[bytes[i] >> 2];
+    base64 += base64Chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+    base64 += base64Chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+    base64 += base64Chars[bytes[i + 2] & 63];
+  }
+
+  if ((len % 3) === 2) {
+    base64 = base64.substring(0, base64.length - 1) + '=';
+  } else if (len % 3 === 1) {
+    base64 = base64.substring(0, base64.length - 2) + '==';
+  }
+
+  return base64;
+};
+
+var binaryToBase64Replacer = function (key, value) {
+  if (commonjsGlobal.ArrayBuffer && value instanceof commonjsGlobal.ArrayBuffer) {
+    return {
+      base64: true,
+      data: arrayBufferToBase64(value)
+    };
+  } else if (commonjsGlobal.Buffer) {
+    if (value instanceof commonjsGlobal.Buffer){
+      return {
+        base64: true,
+        data: value.toString('base64')
+      };
+    }
+    // Some versions of Node.js convert Buffers to Objects before they are passed to
+    // the replacer function - Because of this, we need to rehydrate Buffers
+    // before we can convert them to base64 strings.
+    if (value && value.type == 'Buffer' && value.data instanceof Array) {
+      var rehydratedBuffer;
+      if (commonjsGlobal.Buffer.from) {
+        rehydratedBuffer = commonjsGlobal.Buffer.from(value.data);
+      } else {
+        rehydratedBuffer = new commonjsGlobal.Buffer(value.data);
+      }
+      return {
+        base64: true,
+        data: rehydratedBuffer.toString('base64')
+      };
+    }
+  }
+  return value;
+};
+
+// Decode the data which was transmitted over the wire to a JavaScript Object in a format which SC understands.
+// See encode function below for more details.
+var decode = function (input) {
+  if (input == null) {
+   return null;
+  }
+  // Leave ping or pong message as is
+  if (input == '#1' || input == '#2') {
+    return input;
+  }
+  var message = input.toString();
+
+  try {
+    return JSON.parse(message);
+  } catch (err) {}
+  return message;
+};
+
+
+// Encode a raw JavaScript object (which is in the SC protocol format) into a format for
+// transfering it over the wire. In this case, we just convert it into a simple JSON string.
+// If you want to create your own custom codec, you can encode the object into any format
+// (e.g. binary ArrayBuffer or string with any kind of compression) so long as your decode
+// function is able to rehydrate that object back into its original JavaScript Object format
+// (which adheres to the SC protocol).
+// See https://github.com/SocketCluster/socketcluster/blob/master/socketcluster-protocol.md
+// for details about the SC protocol.
+var encode = function (object) {
+  // Leave ping or pong message as is
+  if (object == '#1' || object == '#2') {
+    return object;
+  }
+  return JSON.stringify(object, binaryToBase64Replacer);
+};
+
+var index$20 = {
+	decode: decode,
+	encode: encode
+};
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+// If obj.hasOwnProperty has been overridden, then calling
+// obj.hasOwnProperty(prop) will break.
+// See: https://github.com/joyent/node/issues/1707
+function hasOwnProperty$4(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+var isArray$1 = Array.isArray || function (xs) {
+  return Object.prototype.toString.call(xs) === '[object Array]';
+};
+function stringifyPrimitive(v) {
+  switch (typeof v) {
+    case 'string':
+      return v;
+
+    case 'boolean':
+      return v ? 'true' : 'false';
+
+    case 'number':
+      return isFinite(v) ? v : '';
+
+    default:
+      return '';
+  }
+}
+
+function stringify$1 (obj, sep, eq, name) {
+  sep = sep || '&';
+  eq = eq || '=';
+  if (obj === null) {
+    obj = undefined;
+  }
+
+  if (typeof obj === 'object') {
+    return map$6(objectKeys(obj), function(k) {
+      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
+      if (isArray$1(obj[k])) {
+        return map$6(obj[k], function(v) {
+          return ks + encodeURIComponent(stringifyPrimitive(v));
+        }).join(sep);
+      } else {
+        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
+      }
+    }).join(sep);
+
+  }
+
+  if (!name) return '';
+  return encodeURIComponent(stringifyPrimitive(name)) + eq +
+         encodeURIComponent(stringifyPrimitive(obj));
+}
+
+function map$6 (xs, f) {
+  if (xs.map) return xs.map(f);
+  var res = [];
+  for (var i = 0; i < xs.length; i++) {
+    res.push(f(xs[i], i));
+  }
+  return res;
+}
+
+var objectKeys = Object.keys || function (obj) {
+  var res = [];
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) res.push(key);
+  }
+  return res;
+};
+
+function parse$5(qs, sep, eq, options) {
+  sep = sep || '&';
+  eq = eq || '=';
+  var obj = {};
+
+  if (typeof qs !== 'string' || qs.length === 0) {
+    return obj;
+  }
+
+  var regexp = /\+/g;
+  qs = qs.split(sep);
+
+  var maxKeys = 1000;
+  if (options && typeof options.maxKeys === 'number') {
+    maxKeys = options.maxKeys;
+  }
+
+  var len = qs.length;
+  // maxKeys <= 0 means that we should not limit keys count
+  if (maxKeys > 0 && len > maxKeys) {
+    len = maxKeys;
+  }
+
+  for (var i = 0; i < len; ++i) {
+    var x = qs[i].replace(regexp, '%20'),
+        idx = x.indexOf(eq),
+        kstr, vstr, k, v;
+
+    if (idx >= 0) {
+      kstr = x.substr(0, idx);
+      vstr = x.substr(idx + 1);
+    } else {
+      kstr = x;
+      vstr = '';
+    }
+
+    k = decodeURIComponent(kstr);
+    v = decodeURIComponent(vstr);
+
+    if (!hasOwnProperty$4(obj, k)) {
+      obj[k] = v;
+    } else if (isArray$1(obj[k])) {
+      obj[k].push(v);
+    } else {
+      obj[k] = [obj[k], v];
+    }
+  }
+
+  return obj;
+}
+var qs = {
+  encode: stringify$1,
+  stringify: stringify$1,
+  decode: parse$5,
+  parse: parse$5
+};
+
+
+
+var qs$1 = Object.freeze({
+	stringify: stringify$1,
+	parse: parse$5,
+	default: qs,
+	encode: stringify$1,
+	decode: parse$5
+});
+
+var global$1;
+if (typeof WorkerGlobalScope !== 'undefined') {
+  global$1 = self;
+} else {
+  global$1 = typeof window != 'undefined' && window || (function() { return this; })();
+}
+
+var WebSocket$1 = global$1.WebSocket || global$1.MozWebSocket;
+
+/**
+ * WebSocket constructor.
+ *
+ * The third `opts` options object gets ignored in web browsers, since it's
+ * non-standard, and throws a TypeError if passed to the constructor.
+ * See: https://github.com/einaros/ws/issues/227
+ *
+ * @param {String} uri
+ * @param {Array} protocols (optional)
+ * @param {Object} opts (optional)
+ * @api public
+ */
+
+function ws(uri, protocols, opts) {
+  var instance;
+  if (protocols) {
+    instance = new WebSocket$1(uri, protocols);
+  } else {
+    instance = new WebSocket$1(uri);
+  }
+  return instance;
+}
+
+if (WebSocket$1) ws.prototype = WebSocket$1.prototype;
+
+var wsBrowser = WebSocket$1 ? ws : null;
+
+var querystring = ( qs$1 && qs ) || qs$1;
+
+var SCEmitter$4 = index$12.SCEmitter;
+var Response$2 = response.Response;
+
+var WebSocket;
+var createWebSocket;
+
+if (commonjsGlobal.WebSocket) {
+  WebSocket = commonjsGlobal.WebSocket;
+  createWebSocket = function (uri, options) {
+    return new WebSocket(uri);
+  };
+} else {
+  WebSocket = wsBrowser;
+  createWebSocket = function (uri, options) {
+    return new WebSocket(uri, null, options);
+  };
+}
+
+
+var TimeoutError$2 = index$18.TimeoutError;
+
+
+var SCTransport$1 = function (authEngine, codecEngine, options) {
+  this.state = this.CLOSED;
+  this.auth = authEngine;
+  this.codec = codecEngine;
+  this.options = options;
+  this.connectTimeout = options.connectTimeout;
+  this.pingTimeout = options.ackTimeout;
+  this.callIdGenerator = options.callIdGenerator;
+
+  this._pingTimeoutTicker = null;
+  this._callbackMap = {};
+
+  this.open();
+};
+
+SCTransport$1.prototype = Object.create(SCEmitter$4.prototype);
+
+SCTransport$1.CONNECTING = SCTransport$1.prototype.CONNECTING = 'connecting';
+SCTransport$1.OPEN = SCTransport$1.prototype.OPEN = 'open';
+SCTransport$1.CLOSED = SCTransport$1.prototype.CLOSED = 'closed';
+
+SCTransport$1.prototype.uri = function () {
+  var query = this.options.query || {};
+  var schema = this.options.secure ? 'wss' : 'ws';
+
+  if (this.options.timestampRequests) {
+    query[this.options.timestampParam] = (new Date()).getTime();
+  }
+
+  query = querystring.encode(query);
+
+  if (query.length) {
+    query = '?' + query;
+  }
+
+  var host;
+  if (this.options.host) {
+    host = this.options.host;
+  } else {
+    var port = '';
+
+    if (this.options.port && ((schema == 'wss' && this.options.port != 443)
+      || (schema == 'ws' && this.options.port != 80))) {
+      port = ':' + this.options.port;
+    }
+    host = this.options.hostname + port;
+  }
+
+  return schema + '://' + host + this.options.path + query;
+};
+
+SCTransport$1.prototype.open = function () {
+  var self = this;
+
+  this.state = this.CONNECTING;
+  var uri = this.uri();
+
+  var wsSocket = createWebSocket(uri, this.options);
+  wsSocket.binaryType = this.options.binaryType;
+  this.socket = wsSocket;
+
+  wsSocket.onopen = function () {
+    self._onOpen();
+  };
+
+  wsSocket.onclose = function (event) {
+    var code;
+    if (event.code == null) {
+      // This is to handle an edge case in React Native whereby
+      // event.code is undefined when the mobile device is locked.
+      // TODO: This is not perfect since this condition could also apply to
+      // an abnormal close (no close control frame) which would be a 1006.
+      code = 1005;
+    } else {
+      code = event.code;
+    }
+    self._onClose(code, event.reason);
+  };
+
+  wsSocket.onmessage = function (message, flags) {
+    self._onMessage(message.data);
+  };
+
+  wsSocket.onerror = function (error) {
+    // The onclose event will be called automatically after the onerror event
+    // if the socket is connected - Otherwise, if it's in the middle of
+    // connecting, we want to close it manually with a 1006 - This is necessary
+    // to prevent inconsistent behavior when running the client in Node.js
+    // vs in a browser.
+
+    if (self.state === self.CONNECTING) {
+      self._onClose(1006);
+    }
+  };
+
+  this._connectTimeoutRef = setTimeout(function () {
+    self._onClose(4007);
+    self.socket.close(4007);
+  }, this.connectTimeout);
+};
+
+SCTransport$1.prototype._onOpen = function () {
+  var self = this;
+
+  clearTimeout(this._connectTimeoutRef);
+  this._resetPingTimeout();
+
+  this._handshake(function (err, status) {
+    if (err) {
+      self._onError(err);
+      self._onClose(4003);
+      self.socket.close(4003);
+    } else {
+      self.state = self.OPEN;
+      SCEmitter$4.prototype.emit.call(self, 'open', status);
+      self._resetPingTimeout();
+    }
+  });
+};
+
+SCTransport$1.prototype._handshake = function (callback) {
+  var self = this;
+  this.auth.loadToken(this.options.authTokenName, function (err, token) {
+    if (err) {
+      callback(err);
+    } else {
+      // Don't wait for this.state to be 'open'.
+      // The underlying WebSocket (this.socket) is already open.
+      var options = {
+        force: true
+      };
+      self.emit('#handshake', {
+        authToken: token
+      }, options, function (err, status) {
+        if (status) {
+          // Add the token which was used as part of authentication attempt
+          // to the status object.
+          status.authToken = token;
+          if (status.authError) {
+            status.authError = index$18.hydrateError(status.authError);
+          }
+        }
+        callback(err, status);
+      });
+    }
+  });
+};
+
+SCTransport$1.prototype._onClose = function (code, data) {
+  delete this.socket.onopen;
+  delete this.socket.onclose;
+  delete this.socket.onmessage;
+  delete this.socket.onerror;
+
+  clearTimeout(this._connectTimeoutRef);
+
+  if (this.state == this.OPEN) {
+    this.state = this.CLOSED;
+    SCEmitter$4.prototype.emit.call(this, 'close', code, data);
+
+  } else if (this.state == this.CONNECTING) {
+    this.state = this.CLOSED;
+    SCEmitter$4.prototype.emit.call(this, 'openAbort', code, data);
+  }
+};
+
+SCTransport$1.prototype._onMessage = function (message) {
+  SCEmitter$4.prototype.emit.call(this, 'event', 'message', message);
+
+  var obj = this.decode(message);
+
+  // If ping
+  if (obj == '#1') {
+    this._resetPingTimeout();
+    if (this.socket.readyState == this.socket.OPEN) {
+      this.sendObject('#2');
+    }
+  } else {
+    var event = obj.event;
+
+    if (event) {
+      var response$$1 = new Response$2(this, obj.cid);
+      SCEmitter$4.prototype.emit.call(this, 'event', event, obj.data, response$$1);
+    } else if (obj.rid != null) {
+
+      var eventObject = this._callbackMap[obj.rid];
+      if (eventObject) {
+        clearTimeout(eventObject.timeout);
+        delete this._callbackMap[obj.rid];
+
+        if (eventObject.callback) {
+          var rehydratedError = index$18.hydrateError(obj.error);
+          eventObject.callback(rehydratedError, obj.data);
+        }
+      }
+    } else {
+      SCEmitter$4.prototype.emit.call(this, 'event', 'raw', obj);
+    }
+  }
+};
+
+SCTransport$1.prototype._onError = function (err) {
+  SCEmitter$4.prototype.emit.call(this, 'error', err);
+};
+
+SCTransport$1.prototype._resetPingTimeout = function () {
+  var self = this;
+
+  var now = (new Date()).getTime();
+  clearTimeout(this._pingTimeoutTicker);
+
+  this._pingTimeoutTicker = setTimeout(function () {
+    self._onClose(4000);
+    self.socket.close(4000);
+  }, this.pingTimeout);
+};
+
+SCTransport$1.prototype.getBytesReceived = function () {
+  return this.socket.bytesReceived;
+};
+
+SCTransport$1.prototype.close = function (code, data) {
+  code = code || 1000;
+
+  if (this.state == this.OPEN) {
+    var packet = {
+      code: code,
+      data: data
+    };
+    this.emit('#disconnect', packet);
+
+    this._onClose(code, data);
+    this.socket.close(code);
+
+  } else if (this.state == this.CONNECTING) {
+    this._onClose(code, data);
+    this.socket.close(code);
+  }
+};
+
+SCTransport$1.prototype.emitObject = function (eventObject) {
+  var simpleEventObject = {
+    event: eventObject.event,
+    data: eventObject.data
+  };
+
+  if (eventObject.callback) {
+    simpleEventObject.cid = eventObject.cid = this.callIdGenerator();
+    this._callbackMap[eventObject.cid] = eventObject;
+  }
+
+  this.sendObject(simpleEventObject);
+  return eventObject.cid || null;
+};
+
+SCTransport$1.prototype._handleEventAckTimeout = function (eventObject) {
+  var errorMessage = "Event response for '" + eventObject.event + "' timed out";
+  var error = new TimeoutError$2(errorMessage);
+
+  if (eventObject.cid) {
+    delete this._callbackMap[eventObject.cid];
+  }
+  var callback = eventObject.callback;
+  delete eventObject.callback;
+  callback.call(eventObject, error, eventObject);
+};
+
+// The last two optional arguments (a and b) can be options and/or callback
+SCTransport$1.prototype.emit = function (event, data, a, b) {
+  var self = this;
+
+  var callback, options;
+
+  if (b) {
+    options = a;
+    callback = b;
+  } else {
+    if (a instanceof Function) {
+      options = {};
+      callback = a;
+    } else {
+      options = a;
+    }
+  }
+
+  var eventObject = {
+    event: event,
+    data: data,
+    callback: callback
+  };
+
+  if (callback && !options.noTimeout) {
+    eventObject.timeout = setTimeout(function () {
+      self._handleEventAckTimeout(eventObject);
+    }, this.options.ackTimeout);
+  }
+
+  var cid = null;
+  if (this.state == this.OPEN || options.force) {
+    cid = this.emitObject(eventObject);
+  }
+  return cid;
+};
+
+SCTransport$1.prototype.cancelPendingResponse = function (cid) {
+  delete this._callbackMap[cid];
+};
+
+SCTransport$1.prototype.decode = function (message) {
+  return this.codec.decode(message);
+};
+
+SCTransport$1.prototype.encode = function (object) {
+  return this.codec.encode(object);
+};
+
+SCTransport$1.prototype.send = function (data) {
+  if (this.socket.readyState != this.socket.OPEN) {
+    this._onClose(1005);
+  } else {
+    this.socket.send(data);
+  }
+};
+
+SCTransport$1.prototype.serializeObject = function (object) {
+  var str, formatError;
+  try {
+    str = this.encode(object);
+  } catch (err) {
+    formatError = err;
+    this._onError(formatError);
+  }
+  if (!formatError) {
+    return str;
+  }
+  return null;
+};
+
+SCTransport$1.prototype.sendObject = function (object) {
+  var str = this.serializeObject(object);
+  if (str != null) {
+    this.send(str);
+  }
+};
+
+var SCTransport_1 = SCTransport$1;
+
+var sctransport = {
+	SCTransport: SCTransport_1
+};
+
+/**
+ * Constants.
+ */
+
+var errorMessage;
+
+errorMessage = 'An argument without append, prepend, ' +
+    'or detach methods was given to `List';
+
+/**
+ * Creates a new List: A linked list is a bit like an Array, but
+ * knows nothing about how many items are in it, and knows only about its
+ * first (`head`) and last (`tail`) items. Each item (e.g. `head`, `tail`,
+ * &c.) knows which item comes before or after it (its more like the
+ * implementation of the DOM in JavaScript).
+ * @global
+ * @private
+ * @constructor
+ * @class Represents an instance of List.
+ */
+
+function List$3(/*items...*/) {
+    if (arguments.length) {
+        return List$3.from(arguments);
+    }
+}
+
+var ListPrototype;
+
+ListPrototype = List$3.prototype;
+
+/**
+ * Creates a new list from the arguments (each a list item) passed in.
+ * @name List.of
+ * @param {...ListItem} [items] - Zero or more items to attach.
+ * @returns {list} - A new instance of List.
+ */
+
+List$3.of = function (/*items...*/) {
+    return List$3.from.call(this, arguments);
+};
+
+/**
+ * Creates a new list from the given array-like object (each a list item)
+ * passed in.
+ * @name List.from
+ * @param {ListItem[]} [items] - The items to append.
+ * @returns {list} - A new instance of List.
+ */
+List$3.from = function (items) {
+    var list = new this(), length, iterator, item;
+
+    if (items && (length = items.length)) {
+        iterator = -1;
+
+        while (++iterator < length) {
+            item = items[iterator];
+
+            if (item !== null && item !== undefined) {
+                list.append(item);
+            }
+        }
+    }
+
+    return list;
+};
+
+/**
+ * List#head
+ * Default to `null`.
+ */
+ListPrototype.head = null;
+
+/**
+ * List#tail
+ * Default to `null`.
+ */
+ListPrototype.tail = null;
+
+/**
+ * Returns the list's items as an array. This does *not* detach the items.
+ * @name List#toArray
+ * @returns {ListItem[]} - An array of (still attached) ListItems.
+ */
+ListPrototype.toArray = function () {
+    var item = this.head,
+        result = [];
+
+    while (item) {
+        result.push(item);
+        item = item.next;
+    }
+
+    return result;
+};
+
+/**
+ * Prepends the given item to the list: Item will be the new first item
+ * (`head`).
+ * @name List#prepend
+ * @param {ListItem} item - The item to prepend.
+ * @returns {ListItem} - An instance of ListItem (the given item).
+ */
+ListPrototype.prepend = function (item) {
+    if (!item) {
+        return false;
+    }
+
+    if (!item.append || !item.prepend || !item.detach) {
+        throw new Error(errorMessage + '#prepend`.');
+    }
+
+    var self, head;
+
+    // Cache self.
+    self = this;
+
+    // If self has a first item, defer prepend to the first items prepend
+    // method, and return the result.
+    head = self.head;
+
+    if (head) {
+        return head.prepend(item);
+    }
+
+    // ...otherwise, there is no `head` (or `tail`) item yet.
+
+    // Detach the prependee.
+    item.detach();
+
+    // Set the prependees parent list to reference self.
+    item.list = self;
+
+    // Set self's first item to the prependee, and return the item.
+    self.head = item;
+
+    return item;
+};
+
+/**
+ * Appends the given item to the list: Item will be the new last item (`tail`)
+ * if the list had a first item, and its first item (`head`) otherwise.
+ * @name List#append
+ * @param {ListItem} item - The item to append.
+ * @returns {ListItem} - An instance of ListItem (the given item).
+ */
+
+ListPrototype.append = function (item) {
+    if (!item) {
+        return false;
+    }
+
+    if (!item.append || !item.prepend || !item.detach) {
+        throw new Error(errorMessage + '#append`.');
+    }
+
+    var self, head, tail;
+
+    // Cache self.
+    self = this;
+
+    // If self has a last item, defer appending to the last items append
+    // method, and return the result.
+    tail = self.tail;
+
+    if (tail) {
+        return tail.append(item);
+    }
+
+    // If self has a first item, defer appending to the first items append
+    // method, and return the result.
+    head = self.head;
+
+    if (head) {
+        return head.append(item);
+    }
+
+    // ...otherwise, there is no `tail` or `head` item yet.
+
+    // Detach the appendee.
+    item.detach();
+
+    // Set the appendees parent list to reference self.
+    item.list = self;
+
+    // Set self's first item to the appendee, and return the item.
+    self.head = item;
+
+    return item;
+};
+
+/**
+ * Creates a new ListItem: A linked list item is a bit like DOM node:
+ * It knows only about its "parent" (`list`), the item before it (`prev`),
+ * and the item after it (`next`).
+ * @global
+ * @private
+ * @constructor
+ * @class Represents an instance of ListItem.
+ */
+
+function ListItem() {}
+
+List$3.Item = ListItem;
+
+var ListItemPrototype = ListItem.prototype;
+
+ListItemPrototype.next = null;
+
+ListItemPrototype.prev = null;
+
+ListItemPrototype.list = null;
+
+/**
+ * Detaches the item operated on from its parent list.
+ * @name ListItem#detach
+ * @returns {ListItem} - The item operated on.
+ */
+ListItemPrototype.detach = function () {
+    // Cache self, the parent list, and the previous and next items.
+    var self = this,
+        list = self.list,
+        prev = self.prev,
+        next = self.next;
+
+    // If the item is already detached, return self.
+    if (!list) {
+        return self;
+    }
+
+    // If self is the last item in the parent list, link the lists last item
+    // to the previous item.
+    if (list.tail === self) {
+        list.tail = prev;
+    }
+
+    // If self is the first item in the parent list, link the lists first item
+    // to the next item.
+    if (list.head === self) {
+        list.head = next;
+    }
+
+    // If both the last and first items in the parent list are the same,
+    // remove the link to the last item.
+    if (list.tail === list.head) {
+        list.tail = null;
+    }
+
+    // If a previous item exists, link its next item to selfs next item.
+    if (prev) {
+        prev.next = next;
+    }
+
+    // If a next item exists, link its previous item to selfs previous item.
+    if (next) {
+        next.prev = prev;
+    }
+
+    // Remove links from self to both the next and previous items, and to the
+    // parent list.
+    self.prev = self.next = self.list = null;
+
+    // Return self.
+    return self;
+};
+
+/**
+ * Prepends the given item *before* the item operated on.
+ * @name ListItem#prepend
+ * @param {ListItem} item - The item to prepend.
+ * @returns {ListItem} - The item operated on, or false when that item is not
+ * attached.
+ */
+ListItemPrototype.prepend = function (item) {
+    if (!item || !item.append || !item.prepend || !item.detach) {
+        throw new Error(errorMessage + 'Item#prepend`.');
+    }
+
+    // Cache self, the parent list, and the previous item.
+    var self = this,
+        list = self.list,
+        prev = self.prev;
+
+    // If self is detached, return false.
+    if (!list) {
+        return false;
+    }
+
+    // Detach the prependee.
+    item.detach();
+
+    // If self has a previous item...
+    if (prev) {
+        // ...link the prependees previous item, to selfs previous item.
+        item.prev = prev;
+
+        // ...link the previous items next item, to self.
+        prev.next = item;
+    }
+
+    // Set the prependees next item to self.
+    item.next = self;
+
+    // Set the prependees parent list to selfs parent list.
+    item.list = list;
+
+    // Set the previous item of self to the prependee.
+    self.prev = item;
+
+    // If self is the first item in the parent list, link the lists first item
+    // to the prependee.
+    if (self === list.head) {
+        list.head = item;
+    }
+
+    // If the the parent list has no last item, link the lists last item to
+    // self.
+    if (!list.tail) {
+        list.tail = self;
+    }
+
+    // Return the prependee.
+    return item;
+};
+
+/**
+ * Appends the given item *after* the item operated on.
+ * @name ListItem#append
+ * @param {ListItem} item - The item to append.
+ * @returns {ListItem} - The item operated on, or false when that item is not
+ * attached.
+ */
+ListItemPrototype.append = function (item) {
+    // If item is falsey, return false.
+    if (!item || !item.append || !item.prepend || !item.detach) {
+        throw new Error(errorMessage + 'Item#append`.');
+    }
+
+    // Cache self, the parent list, and the next item.
+    var self = this,
+        list = self.list,
+        next = self.next;
+
+    // If self is detached, return false.
+    if (!list) {
+        return false;
+    }
+
+    // Detach the appendee.
+    item.detach();
+
+    // If self has a next item...
+    if (next) {
+        // ...link the appendees next item, to selfs next item.
+        item.next = next;
+
+        // ...link the next items previous item, to the appendee.
+        next.prev = item;
+    }
+
+    // Set the appendees previous item to self.
+    item.prev = self;
+
+    // Set the appendees parent list to selfs parent list.
+    item.list = list;
+
+    // Set the next item of self to the appendee.
+    self.next = item;
+
+    // If the the parent list has no last item or if self is the parent lists
+    // last item, link the lists last item to the appendee.
+    if (self === list.tail || !list.tail) {
+        list.tail = item;
+    }
+
+    // Return the appendee.
+    return item;
+};
+
+/**
+ * Expose `List`.
+ */
+
+var linkedList = List$3;
+
+var index$22 = linkedList;
+
+var base64 = createCommonjsModule(function (module, exports) {
+/*! http://mths.be/base64 v0.1.0 by @mathias | MIT license */
+(function(root) {
+
+	// Detect free variables `exports`.
+	var freeExports = 'object' == 'object' && exports;
+
+	// Detect free variable `module`.
+	var freeModule = 'object' == 'object' && module &&
+		module.exports == freeExports && module;
+
+	// Detect free variable `global`, from Node.js or Browserified code, and use
+	// it as `root`.
+	var freeGlobal = typeof commonjsGlobal == 'object' && commonjsGlobal;
+	if (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal) {
+		root = freeGlobal;
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	var InvalidCharacterError = function(message) {
+		this.message = message;
+	};
+	InvalidCharacterError.prototype = new Error;
+	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
+
+	var error = function(message) {
+		// Note: the error messages used throughout this file match those used by
+		// the native `atob`/`btoa` implementation in Chromium.
+		throw new InvalidCharacterError(message);
+	};
+
+	var TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	// http://whatwg.org/html/common-microsyntaxes.html#space-character
+	var REGEX_SPACE_CHARACTERS = /[\t\n\f\r ]/g;
+
+	// `decode` is designed to be fully compatible with `atob` as described in the
+	// HTML Standard. http://whatwg.org/html/webappapis.html#dom-windowbase64-atob
+	// The optimized base64-decoding algorithm used is based on @atk’s excellent
+	// implementation. https://gist.github.com/atk/1020396
+	var decode = function(input) {
+		input = String(input)
+			.replace(REGEX_SPACE_CHARACTERS, '');
+		var length = input.length;
+		if (length % 4 == 0) {
+			input = input.replace(/==?$/, '');
+			length = input.length;
+		}
+		if (
+			length % 4 == 1 ||
+			// http://whatwg.org/C#alphanumeric-ascii-characters
+			/[^+a-zA-Z0-9/]/.test(input)
+		) {
+			error(
+				'Invalid character: the string to be decoded is not correctly encoded.'
+			);
+		}
+		var bitCounter = 0;
+		var bitStorage;
+		var buffer;
+		var output = '';
+		var position = -1;
+		while (++position < length) {
+			buffer = TABLE.indexOf(input.charAt(position));
+			bitStorage = bitCounter % 4 ? bitStorage * 64 + buffer : buffer;
+			// Unless this is the first of a group of 4 characters…
+			if (bitCounter++ % 4) {
+				// …convert the first 8 bits to a single ASCII character.
+				output += String.fromCharCode(
+					0xFF & bitStorage >> (-2 * bitCounter & 6)
+				);
+			}
+		}
+		return output;
+	};
+
+	// `encode` is designed to be fully compatible with `btoa` as described in the
+	// HTML Standard: http://whatwg.org/html/webappapis.html#dom-windowbase64-btoa
+	var encode = function(input) {
+		input = String(input);
+		if (/[^\0-\xFF]/.test(input)) {
+			// Note: no need to special-case astral symbols here, as surrogates are
+			// matched, and the input is supposed to only contain ASCII anyway.
+			error(
+				'The string to be encoded contains characters outside of the ' +
+				'Latin1 range.'
+			);
+		}
+		var padding = input.length % 3;
+		var output = '';
+		var position = -1;
+		var a;
+		var b;
+		var c;
+		var d;
+		var buffer;
+		// Make sure any padding is handled outside of the loop.
+		var length = input.length - padding;
+
+		while (++position < length) {
+			// Read three bytes, i.e. 24 bits.
+			a = input.charCodeAt(position) << 16;
+			b = input.charCodeAt(++position) << 8;
+			c = input.charCodeAt(++position);
+			buffer = a + b + c;
+			// Turn the 24 bits into four chunks of 6 bits each, and append the
+			// matching character for each of them to the output.
+			output += (
+				TABLE.charAt(buffer >> 18 & 0x3F) +
+				TABLE.charAt(buffer >> 12 & 0x3F) +
+				TABLE.charAt(buffer >> 6 & 0x3F) +
+				TABLE.charAt(buffer & 0x3F)
+			);
+		}
+
+		if (padding == 2) {
+			a = input.charCodeAt(position) << 8;
+			b = input.charCodeAt(++position);
+			buffer = a + b;
+			output += (
+				TABLE.charAt(buffer >> 10) +
+				TABLE.charAt((buffer >> 4) & 0x3F) +
+				TABLE.charAt((buffer << 2) & 0x3F) +
+				'='
+			);
+		} else if (padding == 1) {
+			buffer = input.charCodeAt(position);
+			output += (
+				TABLE.charAt(buffer >> 2) +
+				TABLE.charAt((buffer << 4) & 0x3F) +
+				'=='
+			);
+		}
+
+		return output;
+	};
+
+	var base64 = {
+		'encode': encode,
+		'decode': decode,
+		'version': '0.1.0'
+	};
+
+	// Some AMD build optimizers, like r.js, check for specific condition patterns
+	// like the following:
+	if (
+		typeof undefined == 'function' &&
+		typeof undefined.amd == 'object' &&
+		undefined.amd
+	) {
+		undefined(function() {
+			return base64;
+		});
+	}	else if (freeExports && !freeExports.nodeType) {
+		if (freeModule) { // in Node.js or RingoJS v0.8.0+
+			freeModule.exports = base64;
+		} else { // in Narwhal or RingoJS v0.7.0-
+			for (var key in base64) {
+				base64.hasOwnProperty(key) && (freeExports[key] = base64[key]);
+			}
+		}
+	} else { // in Rhino or a web browser
+		root.base64 = base64;
+	}
+
+}(commonjsGlobal));
+});
+
+var clone_1 = createCommonjsModule(function (module) {
+var clone = (function() {
+'use strict';
+
+function _instanceof(obj, type) {
+  return type != null && obj instanceof type;
+}
+
+var nativeMap;
+try {
+  nativeMap = Map;
+} catch(_) {
+  // maybe a reference error because no `Map`. Give it a dummy value that no
+  // value will ever be an instanceof.
+  nativeMap = function() {};
+}
+
+var nativeSet;
+try {
+  nativeSet = Set;
+} catch(_) {
+  nativeSet = function() {};
+}
+
+var nativePromise;
+try {
+  nativePromise = Promise;
+} catch(_) {
+  nativePromise = function() {};
+}
+
+/**
+ * Clones (copies) an Object using deep copying.
+ *
+ * This function supports circular references by default, but if you are certain
+ * there are no circular references in your object, you can save some CPU time
+ * by calling clone(obj, false).
+ *
+ * Caution: if `circular` is false and `parent` contains circular references,
+ * your program may enter an infinite loop and crash.
+ *
+ * @param `parent` - the object to be cloned
+ * @param `circular` - set to true if the object to be cloned may contain
+ *    circular references. (optional - true by default)
+ * @param `depth` - set to a number if the object is only to be cloned to
+ *    a particular depth. (optional - defaults to Infinity)
+ * @param `prototype` - sets the prototype to be used when cloning an object.
+ *    (optional - defaults to parent prototype).
+ * @param `includeNonEnumerable` - set to true if the non-enumerable properties
+ *    should be cloned as well. Non-enumerable properties on the prototype
+ *    chain will be ignored. (optional - false by default)
+*/
+function clone(parent, circular, depth, prototype, includeNonEnumerable) {
+  if (typeof circular === 'object') {
+    depth = circular.depth;
+    prototype = circular.prototype;
+    includeNonEnumerable = circular.includeNonEnumerable;
+    circular = circular.circular;
+  }
+  // maintain two arrays for circular references, where corresponding parents
+  // and children have the same index
+  var allParents = [];
+  var allChildren = [];
+
+  var useBuffer = typeof Buffer != 'undefined';
+
+  if (typeof circular == 'undefined')
+    circular = true;
+
+  if (typeof depth == 'undefined')
+    depth = Infinity;
+
+  // recurse this function so we don't reset allParents and allChildren
+  function _clone(parent, depth) {
+    // cloning null always returns null
+    if (parent === null)
+      return null;
+
+    if (depth === 0)
+      return parent;
+
+    var child;
+    var proto;
+    if (typeof parent != 'object') {
+      return parent;
+    }
+
+    if (_instanceof(parent, nativeMap)) {
+      child = new nativeMap();
+    } else if (_instanceof(parent, nativeSet)) {
+      child = new nativeSet();
+    } else if (_instanceof(parent, nativePromise)) {
+      child = new nativePromise(function (resolve, reject) {
+        parent.then(function(value) {
+          resolve(_clone(value, depth - 1));
+        }, function(err) {
+          reject(_clone(err, depth - 1));
+        });
+      });
+    } else if (clone.__isArray(parent)) {
+      child = [];
+    } else if (clone.__isRegExp(parent)) {
+      child = new RegExp(parent.source, __getRegExpFlags(parent));
+      if (parent.lastIndex) child.lastIndex = parent.lastIndex;
+    } else if (clone.__isDate(parent)) {
+      child = new Date(parent.getTime());
+    } else if (useBuffer && Buffer.isBuffer(parent)) {
+      child = new Buffer(parent.length);
+      parent.copy(child);
+      return child;
+    } else if (_instanceof(parent, Error)) {
+      child = Object.create(parent);
+    } else {
+      if (typeof prototype == 'undefined') {
+        proto = Object.getPrototypeOf(parent);
+        child = Object.create(proto);
+      }
+      else {
+        child = Object.create(prototype);
+        proto = prototype;
+      }
+    }
+
+    if (circular) {
+      var index = allParents.indexOf(parent);
+
+      if (index != -1) {
+        return allChildren[index];
+      }
+      allParents.push(parent);
+      allChildren.push(child);
+    }
+
+    if (_instanceof(parent, nativeMap)) {
+      parent.forEach(function(value, key) {
+        var keyChild = _clone(key, depth - 1);
+        var valueChild = _clone(value, depth - 1);
+        child.set(keyChild, valueChild);
+      });
+    }
+    if (_instanceof(parent, nativeSet)) {
+      parent.forEach(function(value) {
+        var entryChild = _clone(value, depth - 1);
+        child.add(entryChild);
+      });
+    }
+
+    for (var i in parent) {
+      var attrs;
+      if (proto) {
+        attrs = Object.getOwnPropertyDescriptor(proto, i);
+      }
+
+      if (attrs && attrs.set == null) {
+        continue;
+      }
+      child[i] = _clone(parent[i], depth - 1);
+    }
+
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(parent);
+      for (var i = 0; i < symbols.length; i++) {
+        // Don't need to worry about cloning a symbol because it is a primitive,
+        // like a number or string.
+        var symbol = symbols[i];
+        var descriptor = Object.getOwnPropertyDescriptor(parent, symbol);
+        if (descriptor && !descriptor.enumerable && !includeNonEnumerable) {
+          continue;
+        }
+        child[symbol] = _clone(parent[symbol], depth - 1);
+        if (!descriptor.enumerable) {
+          Object.defineProperty(child, symbol, {
+            enumerable: false
+          });
+        }
+      }
+    }
+
+    if (includeNonEnumerable) {
+      var allPropertyNames = Object.getOwnPropertyNames(parent);
+      for (var i = 0; i < allPropertyNames.length; i++) {
+        var propertyName = allPropertyNames[i];
+        var descriptor = Object.getOwnPropertyDescriptor(parent, propertyName);
+        if (descriptor && descriptor.enumerable) {
+          continue;
+        }
+        child[propertyName] = _clone(parent[propertyName], depth - 1);
+        Object.defineProperty(child, propertyName, {
+          enumerable: false
+        });
+      }
+    }
+
+    return child;
+  }
+
+  return _clone(parent, depth);
+}
+
+/**
+ * Simple flat clone using prototype, accepts only objects, usefull for property
+ * override on FLAT configuration object (no nested props).
+ *
+ * USE WITH CAUTION! This may not behave as you wish if you do not know how this
+ * works.
+ */
+clone.clonePrototype = function clonePrototype(parent) {
+  if (parent === null)
+    return null;
+
+  var c = function () {};
+  c.prototype = parent;
+  return new c();
+};
+
+// private utility functions
+
+function __objToStr(o) {
+  return Object.prototype.toString.call(o);
+}
+clone.__objToStr = __objToStr;
+
+function __isDate(o) {
+  return typeof o === 'object' && __objToStr(o) === '[object Date]';
+}
+clone.__isDate = __isDate;
+
+function __isArray(o) {
+  return typeof o === 'object' && __objToStr(o) === '[object Array]';
+}
+clone.__isArray = __isArray;
+
+function __isRegExp(o) {
+  return typeof o === 'object' && __objToStr(o) === '[object RegExp]';
+}
+clone.__isRegExp = __isRegExp;
+
+function __getRegExpFlags(re) {
+  var flags = '';
+  if (re.global) flags += 'g';
+  if (re.ignoreCase) flags += 'i';
+  if (re.multiline) flags += 'm';
+  return flags;
+}
+clone.__getRegExpFlags = __getRegExpFlags;
+
+return clone;
+})();
+
+if ('object' === 'object' && module.exports) {
+  module.exports = clone;
+}
+});
+
+var SCEmitter$1 = index$12.SCEmitter;
+var SCChannel = index$16.SCChannel;
+var AuthEngine = auth.AuthEngine;
+
+var SCTransport = sctransport.SCTransport;
+
+
+
+
+
+
+var InvalidArgumentsError = index$18.InvalidArgumentsError;
+var InvalidMessageError = index$18.InvalidMessageError;
+var SocketProtocolError = index$18.SocketProtocolError;
+var TimeoutError = index$18.TimeoutError;
+
+var isBrowser = typeof window != 'undefined';
+
+
+var SCSocket = function (opts) {
+  var self = this;
+
+  SCEmitter$1.call(this);
+
+  this.id = null;
+  this.state = this.CLOSED;
+  this.authState = this.PENDING;
+  this.signedAuthToken = null;
+  this.authToken = null;
+  this.pendingReconnect = false;
+  this.pendingReconnectTimeout = null;
+  this.pendingConnectCallback = false;
+
+  this.connectTimeout = opts.connectTimeout;
+  this.ackTimeout = opts.ackTimeout;
+  this.channelPrefix = opts.channelPrefix || null;
+  this.disconnectOnUnload = opts.disconnectOnUnload == null ? true : opts.disconnectOnUnload;
+
+  // pingTimeout will be ackTimeout at the start, but it will
+  // be updated with values provided by the 'connect' event
+  this.pingTimeout = this.ackTimeout;
+
+  var maxTimeout = Math.pow(2, 31) - 1;
+
+  var verifyDuration = function (propertyName) {
+    if (self[propertyName] > maxTimeout) {
+      throw new InvalidArgumentsError('The ' + propertyName +
+        ' value provided exceeded the maximum amount allowed');
+    }
+  };
+
+  verifyDuration('connectTimeout');
+  verifyDuration('ackTimeout');
+  verifyDuration('pingTimeout');
+
+  this._localEvents = {
+    'connect': 1,
+    'connectAbort': 1,
+    'disconnect': 1,
+    'message': 1,
+    'error': 1,
+    'raw': 1,
+    'fail': 1,
+    'kickOut': 1,
+    'subscribe': 1,
+    'unsubscribe': 1,
+    'subscribeStateChange': 1,
+    'authStateChange': 1,
+    'authenticate': 1,
+    'deauthenticate': 1,
+    'removeAuthToken': 1,
+    'subscribeRequest': 1
+  };
+
+  this.connectAttempts = 0;
+
+  this._emitBuffer = new index$22();
+  this._channels = {};
+
+  this.options = opts;
+
+  this._cid = 1;
+
+  this.options.callIdGenerator = function () {
+    return self._callIdGenerator();
+  };
+
+  if (this.options.autoReconnect) {
+    if (this.options.autoReconnectOptions == null) {
+      this.options.autoReconnectOptions = {};
+    }
+
+    // Add properties to the this.options.autoReconnectOptions object.
+    // We assign the reference to a reconnectOptions variable to avoid repetition.
+    var reconnectOptions = this.options.autoReconnectOptions;
+    if (reconnectOptions.initialDelay == null) {
+      reconnectOptions.initialDelay = 10000;
+    }
+    if (reconnectOptions.randomness == null) {
+      reconnectOptions.randomness = 10000;
+    }
+    if (reconnectOptions.multiplier == null) {
+      reconnectOptions.multiplier = 1.5;
+    }
+    if (reconnectOptions.maxDelay == null) {
+      reconnectOptions.maxDelay = 60000;
+    }
+  }
+
+  if (this.options.subscriptionRetryOptions == null) {
+    this.options.subscriptionRetryOptions = {};
+  }
+
+  if (this.options.authEngine) {
+    this.auth = this.options.authEngine;
+  } else {
+    this.auth = new AuthEngine();
+  }
+
+  if (this.options.codecEngine) {
+    this.codec = this.options.codecEngine;
+  } else {
+    // Default codec engine
+    this.codec = index$20;
+  }
+
+  this.options.path = this.options.path.replace(/\/$/, '') + '/';
+
+  this.options.query = opts.query || {};
+  if (typeof this.options.query == 'string') {
+    this.options.query = querystring.parse(this.options.query);
+  }
+
+  if (this.options.autoConnect) {
+    this.connect();
+  }
+
+  this._channelEmitter = new SCEmitter$1();
+
+  if (isBrowser && this.disconnectOnUnload) {
+    var unloadHandler = function () {
+      self.disconnect();
+    };
+
+    if (commonjsGlobal.attachEvent) {
+      commonjsGlobal.attachEvent('onunload', unloadHandler);
+    } else if (commonjsGlobal.addEventListener) {
+      commonjsGlobal.addEventListener('beforeunload', unloadHandler, false);
+    }
+  }
+};
+
+SCSocket.prototype = Object.create(SCEmitter$1.prototype);
+
+SCSocket.CONNECTING = SCSocket.prototype.CONNECTING = SCTransport.prototype.CONNECTING;
+SCSocket.OPEN = SCSocket.prototype.OPEN = SCTransport.prototype.OPEN;
+SCSocket.CLOSED = SCSocket.prototype.CLOSED = SCTransport.prototype.CLOSED;
+
+SCSocket.AUTHENTICATED = SCSocket.prototype.AUTHENTICATED = 'authenticated';
+SCSocket.UNAUTHENTICATED = SCSocket.prototype.UNAUTHENTICATED = 'unauthenticated';
+SCSocket.PENDING = SCSocket.prototype.PENDING = 'pending';
+
+SCSocket.ignoreStatuses = index$18.socketProtocolIgnoreStatuses;
+SCSocket.errorStatuses = index$18.socketProtocolErrorStatuses;
+
+SCSocket.prototype._privateEventHandlerMap = {
+  '#publish': function (data) {
+    var undecoratedChannelName = this._undecorateChannelName(data.channel);
+    var isSubscribed = this.isSubscribed(undecoratedChannelName, true);
+
+    if (isSubscribed) {
+      this._channelEmitter.emit(undecoratedChannelName, data.data);
+    }
+  },
+  '#kickOut': function (data) {
+    var undecoratedChannelName = this._undecorateChannelName(data.channel);
+    var channel = this._channels[undecoratedChannelName];
+    if (channel) {
+      SCEmitter$1.prototype.emit.call(this, 'kickOut', data.message, undecoratedChannelName);
+      channel.emit('kickOut', data.message, undecoratedChannelName);
+      this._triggerChannelUnsubscribe(channel);
+    }
+  },
+  '#setAuthToken': function (data, response$$1) {
+    var self = this;
+
+    if (data) {
+      var triggerAuthenticate = function (err) {
+        if (err) {
+          // This is a non-fatal error, we don't want to close the connection
+          // because of this but we do want to notify the server and throw an error
+          // on the client.
+          response$$1.error(err);
+          self._onSCError(err);
+        } else {
+          self._changeToAuthenticatedState(data.token);
+          response$$1.end();
+        }
+      };
+
+      this.auth.saveToken(this.options.authTokenName, data.token, {}, triggerAuthenticate);
+    } else {
+      response$$1.error(new InvalidMessageError('No token data provided by #setAuthToken event'));
+    }
+  },
+  '#removeAuthToken': function (data, response$$1) {
+    var self = this;
+
+    this.auth.removeToken(this.options.authTokenName, function (err, oldToken) {
+      if (err) {
+        // Non-fatal error - Do not close the connection
+        response$$1.error(err);
+        self._onSCError(err);
+      } else {
+        SCEmitter$1.prototype.emit.call(self, 'removeAuthToken', oldToken);
+        self._changeToUnauthenticatedState();
+        response$$1.end();
+      }
+    });
+  },
+  '#disconnect': function (data) {
+    this.transport.close(data.code, data.data);
+  }
+};
+
+SCSocket.prototype._callIdGenerator = function () {
+  return this._cid++;
+};
+
+SCSocket.prototype.getState = function () {
+  return this.state;
+};
+
+SCSocket.prototype.getBytesReceived = function () {
+  return this.transport.getBytesReceived();
+};
+
+SCSocket.prototype.deauthenticate = function (callback) {
+  var self = this;
+
+  this.auth.removeToken(this.options.authTokenName, function (err, oldToken) {
+    if (err) {
+      // Non-fatal error - Do not close the connection
+      self._onSCError(err);
+    } else {
+      self.emit('#removeAuthToken');
+      SCEmitter$1.prototype.emit.call(self, 'removeAuthToken', oldToken);
+      self._changeToUnauthenticatedState();
+    }
+    callback && callback(err);
+  });
+};
+
+SCSocket.prototype.connect = SCSocket.prototype.open = function () {
+  var self = this;
+
+  if (this.state == this.CLOSED) {
+    this.pendingReconnect = false;
+    this.pendingReconnectTimeout = null;
+    clearTimeout(this._reconnectTimeoutRef);
+
+    this.state = this.CONNECTING;
+    SCEmitter$1.prototype.emit.call(this, 'connecting');
+
+    this._changeToPendingAuthState();
+
+    if (this.transport) {
+      this.transport.off();
+    }
+
+    this.transport = new SCTransport(this.auth, this.codec, this.options);
+
+    this.transport.on('open', function (status) {
+      self.state = self.OPEN;
+      self._onSCOpen(status);
+    });
+
+    this.transport.on('error', function (err) {
+      self._onSCError(err);
+    });
+
+    this.transport.on('close', function (code, data) {
+      self.state = self.CLOSED;
+      self._onSCClose(code, data);
+    });
+
+    this.transport.on('openAbort', function (code, data) {
+      self.state = self.CLOSED;
+      self._onSCClose(code, data, true);
+    });
+
+    this.transport.on('event', function (event, data, res) {
+      self._onSCEvent(event, data, res);
+    });
+  }
+};
+
+SCSocket.prototype.reconnect = function () {
+  this.disconnect();
+  this.connect();
+};
+
+SCSocket.prototype.disconnect = function (code, data) {
+  code = code || 1000;
+
+  if (typeof code != 'number') {
+    throw new InvalidArgumentsError('If specified, the code argument must be a number');
+  }
+
+  if (this.state == this.OPEN || this.state == this.CONNECTING) {
+    this.transport.close(code, data);
+  } else {
+    this.pendingReconnect = false;
+    this.pendingReconnectTimeout = null;
+    clearTimeout(this._reconnectTimeoutRef);
+  }
+};
+
+SCSocket.prototype._changeToPendingAuthState = function () {
+  if (this.authState != this.PENDING) {
+    var oldState = this.authState;
+    this.authState = this.PENDING;
+    var stateChangeData = {
+      oldState: oldState,
+      newState: this.authState
+    };
+    SCEmitter$1.prototype.emit.call(this, 'authStateChange', stateChangeData);
+  }
+};
+
+SCSocket.prototype._changeToUnauthenticatedState = function () {
+  if (this.authState != this.UNAUTHENTICATED) {
+    var oldState = this.authState;
+    this.authState = this.UNAUTHENTICATED;
+    this.signedAuthToken = null;
+    this.authToken = null;
+
+    var stateChangeData = {
+      oldState: oldState,
+      newState: this.authState
+    };
+    SCEmitter$1.prototype.emit.call(this, 'authStateChange', stateChangeData);
+    if (oldState == this.AUTHENTICATED) {
+      SCEmitter$1.prototype.emit.call(this, 'deauthenticate');
+    }
+    SCEmitter$1.prototype.emit.call(this, 'authTokenChange', this.signedAuthToken);
+  }
+};
+
+SCSocket.prototype._changeToAuthenticatedState = function (signedAuthToken) {
+  this.signedAuthToken = signedAuthToken;
+  this.authToken = this._extractAuthTokenData(signedAuthToken);
+
+  if (this.authState != this.AUTHENTICATED) {
+    var oldState = this.authState;
+    this.authState = this.AUTHENTICATED;
+    var stateChangeData = {
+      oldState: oldState,
+      newState: this.authState,
+      signedAuthToken: signedAuthToken,
+      authToken: this.authToken
+    };
+    this.processPendingSubscriptions();
+
+    SCEmitter$1.prototype.emit.call(this, 'authStateChange', stateChangeData);
+    SCEmitter$1.prototype.emit.call(this, 'authenticate', signedAuthToken);
+  }
+  SCEmitter$1.prototype.emit.call(this, 'authTokenChange', signedAuthToken);
+};
+
+SCSocket.prototype.decodeBase64 = function (encodedString) {
+  var decodedString;
+  if (typeof Buffer == 'undefined') {
+    if (commonjsGlobal.atob) {
+      decodedString = commonjsGlobal.atob(encodedString);
+    } else {
+      decodedString = base64.decode(encodedString);
+    }
+  } else {
+    var buffer = new Buffer(encodedString, 'base64');
+    decodedString = buffer.toString('utf8');
+  }
+  return decodedString;
+};
+
+SCSocket.prototype.encodeBase64 = function (decodedString) {
+  var encodedString;
+  if (typeof Buffer == 'undefined') {
+    if (commonjsGlobal.btoa) {
+      encodedString = commonjsGlobal.btoa(decodedString);
+    } else {
+      encodedString = base64.encode(decodedString);
+    }
+  } else {
+    var buffer = new Buffer(decodedString, 'utf8');
+    encodedString = buffer.toString('base64');
+  }
+  return encodedString;
+};
+
+SCSocket.prototype._extractAuthTokenData = function (signedAuthToken) {
+  var tokenParts = (signedAuthToken || '').split('.');
+  var encodedTokenData = tokenParts[1];
+  if (encodedTokenData != null) {
+    var tokenData = encodedTokenData;
+    try {
+      tokenData = this.decodeBase64(tokenData);
+      return JSON.parse(tokenData);
+    } catch (e) {
+      return tokenData;
+    }
+  }
+  return null;
+};
+
+SCSocket.prototype.getAuthToken = function () {
+  return this.authToken;
+};
+
+SCSocket.prototype.getSignedAuthToken = function () {
+  return this.signedAuthToken;
+};
+
+// Perform client-initiated authentication by providing an encrypted token string
+SCSocket.prototype.authenticate = function (signedAuthToken, callback) {
+  var self = this;
+
+  this._changeToPendingAuthState();
+
+  this.emit('#authenticate', signedAuthToken, function (err, authStatus) {
+    if (authStatus && authStatus.authError) {
+      authStatus.authError = index$18.hydrateError(authStatus.authError);
+    }
+    if (err) {
+      self._changeToUnauthenticatedState();
+      callback && callback(err, authStatus);
+    } else {
+      self.auth.saveToken(self.options.authTokenName, signedAuthToken, {}, function (err) {
+        callback && callback(err, authStatus);
+        if (err) {
+          self._changeToUnauthenticatedState();
+          self._onSCError(err);
+        } else {
+          if (authStatus.isAuthenticated) {
+            self._changeToAuthenticatedState(signedAuthToken);
+          } else {
+            self._changeToUnauthenticatedState();
+          }
+        }
+      });
+    }
+  });
+};
+
+SCSocket.prototype._tryReconnect = function (initialDelay) {
+  var self = this;
+
+  var exponent = this.connectAttempts++;
+  var reconnectOptions = this.options.autoReconnectOptions;
+  var timeout;
+
+  if (initialDelay == null || exponent > 0) {
+    var initialTimeout = Math.round(reconnectOptions.initialDelay + (reconnectOptions.randomness || 0) * Math.random());
+
+    timeout = Math.round(initialTimeout * Math.pow(reconnectOptions.multiplier, exponent));
+  } else {
+    timeout = initialDelay;
+  }
+
+  if (timeout > reconnectOptions.maxDelay) {
+    timeout = reconnectOptions.maxDelay;
+  }
+
+  clearTimeout(this._reconnectTimeoutRef);
+
+  this.pendingReconnect = true;
+  this.pendingReconnectTimeout = timeout;
+  this._reconnectTimeoutRef = setTimeout(function () {
+    self.connect();
+  }, timeout);
+};
+
+SCSocket.prototype._onSCOpen = function (status) {
+  var self = this;
+
+  if (status) {
+    this.id = status.id;
+    this.pingTimeout = status.pingTimeout;
+    this.transport.pingTimeout = this.pingTimeout;
+    if (status.isAuthenticated) {
+      this._changeToAuthenticatedState(status.authToken);
+    } else {
+      this._changeToUnauthenticatedState();
+    }
+  } else {
+    this._changeToUnauthenticatedState();
+  }
+
+  this.connectAttempts = 0;
+  if (this.options.autoProcessSubscriptions) {
+    this.processPendingSubscriptions();
+  } else {
+    this.pendingConnectCallback = true;
+  }
+
+  // If the user invokes the callback while in autoProcessSubscriptions mode, it
+  // won't break anything - The processPendingSubscriptions() call will be a no-op.
+  SCEmitter$1.prototype.emit.call(this, 'connect', status, function () {
+    self.processPendingSubscriptions();
+  });
+
+  this._flushEmitBuffer();
+};
+
+SCSocket.prototype._onSCError = function (err) {
+  var self = this;
+
+  // Throw error in different stack frame so that error handling
+  // cannot interfere with a reconnect action.
+  setTimeout(function () {
+    if (self.listeners('error').length < 1) {
+      throw err;
+    } else {
+      SCEmitter$1.prototype.emit.call(self, 'error', err);
+    }
+  }, 0);
+};
+
+SCSocket.prototype._suspendSubscriptions = function () {
+  var channel, newState;
+  for (var channelName in this._channels) {
+    if (this._channels.hasOwnProperty(channelName)) {
+      channel = this._channels[channelName];
+      if (channel.state == channel.SUBSCRIBED ||
+        channel.state == channel.PENDING) {
+
+        newState = channel.PENDING;
+      } else {
+        newState = channel.UNSUBSCRIBED;
+      }
+
+      this._triggerChannelUnsubscribe(channel, newState);
+    }
+  }
+};
+
+SCSocket.prototype._onSCClose = function (code, data, openAbort) {
+  var self = this;
+
+  this.id = null;
+
+  if (this.transport) {
+    this.transport.off();
+  }
+  this.pendingReconnect = false;
+  this.pendingReconnectTimeout = null;
+  clearTimeout(this._reconnectTimeoutRef);
+
+  this._changeToPendingAuthState();
+  this._suspendSubscriptions();
+
+  // Try to reconnect
+  // on server ping timeout (4000)
+  // or on client pong timeout (4001)
+  // or on close without status (1005)
+  // or on handshake failure (4003)
+  // or on socket hung up (1006)
+  if (this.options.autoReconnect) {
+    if (code == 4000 || code == 4001 || code == 1005) {
+      // If there is a ping or pong timeout or socket closes without
+      // status, don't wait before trying to reconnect - These could happen
+      // if the client wakes up after a period of inactivity and in this case we
+      // want to re-establish the connection as soon as possible.
+      this._tryReconnect(0);
+
+      // Codes 4500 and above will be treated as permanent disconnects.
+      // Socket will not try to auto-reconnect.
+    } else if (code != 1000 && code < 4500) {
+      this._tryReconnect();
+    }
+  }
+
+  if (openAbort) {
+    SCEmitter$1.prototype.emit.call(self, 'connectAbort', code, data);
+  } else {
+    SCEmitter$1.prototype.emit.call(self, 'disconnect', code, data);
+  }
+
+  if (!SCSocket.ignoreStatuses[code]) {
+    var failureMessage;
+    if (data) {
+      failureMessage = 'Socket connection failed: ' + data;
+    } else {
+      failureMessage = 'Socket connection failed for unknown reasons';
+    }
+    var err = new SocketProtocolError(SCSocket.errorStatuses[code] || failureMessage, code);
+    this._onSCError(err);
+  }
+};
+
+SCSocket.prototype._onSCEvent = function (event, data, res) {
+  var handler = this._privateEventHandlerMap[event];
+  if (handler) {
+    handler.call(this, data, res);
+  } else {
+    SCEmitter$1.prototype.emit.call(this, event, data, function () {
+      res && res.callback.apply(res, arguments);
+    });
+  }
+};
+
+SCSocket.prototype.decode = function (message) {
+  return this.transport.decode(message);
+};
+
+SCSocket.prototype.encode = function (object) {
+  return this.transport.encode(object);
+};
+
+SCSocket.prototype._flushEmitBuffer = function () {
+  var currentNode = this._emitBuffer.head;
+  var nextNode;
+
+  while (currentNode) {
+    nextNode = currentNode.next;
+    var eventObject = currentNode.data;
+    currentNode.detach();
+    this.transport.emitObject(eventObject);
+    currentNode = nextNode;
+  }
+};
+
+SCSocket.prototype._handleEventAckTimeout = function (eventObject, eventNode) {
+  if (eventNode) {
+    eventNode.detach();
+  }
+  var callback = eventObject.callback;
+  if (callback) {
+    delete eventObject.callback;
+    var error = new TimeoutError("Event response for '" + eventObject.event + "' timed out");
+    callback.call(eventObject, error, eventObject);
+  }
+};
+
+SCSocket.prototype._emit = function (event, data, callback) {
+  var self = this;
+
+  if (this.state == this.CLOSED) {
+    this.connect();
+  }
+  var eventObject = {
+    event: event,
+    data: data,
+    callback: callback
+  };
+
+  var eventNode = new index$22.Item();
+
+  if (this.options.cloneData) {
+    eventNode.data = clone_1(eventObject);
+  } else {
+    eventNode.data = eventObject;
+  }
+
+  eventObject.timeout = setTimeout(function () {
+    self._handleEventAckTimeout(eventObject, eventNode);
+  }, this.ackTimeout);
+
+  this._emitBuffer.append(eventNode);
+
+  if (this.state == this.OPEN) {
+    this._flushEmitBuffer();
+  }
+};
+
+SCSocket.prototype.send = function (data) {
+  this.transport.send(data);
+};
+
+SCSocket.prototype.emit = function (event, data, callback) {
+  if (this._localEvents[event] == null) {
+    this._emit(event, data, callback);
+  } else {
+    SCEmitter$1.prototype.emit.call(this, event, data);
+  }
+};
+
+SCSocket.prototype.publish = function (channelName, data, callback) {
+  var pubData = {
+    channel: this._decorateChannelName(channelName),
+    data: data
+  };
+  this.emit('#publish', pubData, callback);
+};
+
+SCSocket.prototype._triggerChannelSubscribe = function (channel, subscriptionOptions) {
+  var channelName = channel.name;
+
+  if (channel.state != channel.SUBSCRIBED) {
+    var oldState = channel.state;
+    channel.state = channel.SUBSCRIBED;
+
+    var stateChangeData = {
+      channel: channelName,
+      oldState: oldState,
+      newState: channel.state,
+      subscriptionOptions: subscriptionOptions
+    };
+    channel.emit('subscribeStateChange', stateChangeData);
+    channel.emit('subscribe', channelName, subscriptionOptions);
+    SCEmitter$1.prototype.emit.call(this, 'subscribeStateChange', stateChangeData);
+    SCEmitter$1.prototype.emit.call(this, 'subscribe', channelName, subscriptionOptions);
+  }
+};
+
+SCSocket.prototype._triggerChannelSubscribeFail = function (err, channel, subscriptionOptions) {
+  var channelName = channel.name;
+  var meetsAuthRequirements = !channel.waitForAuth || this.authState == this.AUTHENTICATED;
+
+  if (channel.state != channel.UNSUBSCRIBED && meetsAuthRequirements) {
+    channel.state = channel.UNSUBSCRIBED;
+
+    channel.emit('subscribeFail', err, channelName, subscriptionOptions);
+    SCEmitter$1.prototype.emit.call(this, 'subscribeFail', err, channelName, subscriptionOptions);
+  }
+};
+
+// Cancel any pending subscribe callback
+SCSocket.prototype._cancelPendingSubscribeCallback = function (channel) {
+  if (channel._pendingSubscriptionCid != null) {
+    this.transport.cancelPendingResponse(channel._pendingSubscriptionCid);
+    delete channel._pendingSubscriptionCid;
+  }
+};
+
+SCSocket.prototype._decorateChannelName = function (channelName) {
+  if (this.channelPrefix) {
+    channelName = this.channelPrefix + channelName;
+  }
+  return channelName;
+};
+
+SCSocket.prototype._undecorateChannelName = function (decoratedChannelName) {
+  if (this.channelPrefix && decoratedChannelName.indexOf(this.channelPrefix) == 0) {
+    return decoratedChannelName.replace(this.channelPrefix, '');
+  }
+  return decoratedChannelName;
+};
+
+SCSocket.prototype._trySubscribe = function (channel) {
+  var self = this;
+
+  var meetsAuthRequirements = !channel.waitForAuth || this.authState == this.AUTHENTICATED;
+
+  // We can only ever have one pending subscribe action at any given time on a channel
+  if (this.state == this.OPEN && !this.pendingConnectCallback &&
+    channel._pendingSubscriptionCid == null && meetsAuthRequirements) {
+
+    var options = {
+      noTimeout: true
+    };
+
+    var subscriptionOptions = {
+      channel: this._decorateChannelName(channel.name)
+    };
+    if (channel.waitForAuth) {
+      options.waitForAuth = true;
+      subscriptionOptions.waitForAuth = options.waitForAuth;
+    }
+    if (channel.data) {
+      subscriptionOptions.data = channel.data;
+    }
+
+    channel._pendingSubscriptionCid = this.transport.emit(
+      '#subscribe', subscriptionOptions, options,
+      function (err) {
+        delete channel._pendingSubscriptionCid;
+        if (err) {
+          self._triggerChannelSubscribeFail(err, channel, subscriptionOptions);
+        } else {
+          self._triggerChannelSubscribe(channel, subscriptionOptions);
+        }
+      }
+    );
+    SCEmitter$1.prototype.emit.call(this, 'subscribeRequest', channel.name, subscriptionOptions);
+  }
+};
+
+SCSocket.prototype.subscribe = function (channelName, options) {
+  var channel = this._channels[channelName];
+
+  if (!channel) {
+    channel = new SCChannel(channelName, this, options);
+    this._channels[channelName] = channel;
+  } else if (options) {
+    channel.setOptions(options);
+  }
+
+  if (channel.state == channel.UNSUBSCRIBED) {
+    channel.state = channel.PENDING;
+    this._trySubscribe(channel);
+  }
+
+  return channel;
+};
+
+SCSocket.prototype._triggerChannelUnsubscribe = function (channel, newState) {
+  var channelName = channel.name;
+  var oldState = channel.state;
+
+  if (newState) {
+    channel.state = newState;
+  } else {
+    channel.state = channel.UNSUBSCRIBED;
+  }
+  this._cancelPendingSubscribeCallback(channel);
+
+  if (oldState == channel.SUBSCRIBED) {
+    var stateChangeData = {
+      channel: channelName,
+      oldState: oldState,
+      newState: channel.state
+    };
+    channel.emit('subscribeStateChange', stateChangeData);
+    channel.emit('unsubscribe', channelName);
+    SCEmitter$1.prototype.emit.call(this, 'subscribeStateChange', stateChangeData);
+    SCEmitter$1.prototype.emit.call(this, 'unsubscribe', channelName);
+  }
+};
+
+SCSocket.prototype._tryUnsubscribe = function (channel) {
+  var self = this;
+
+  if (this.state == this.OPEN) {
+    var options = {
+      noTimeout: true
+    };
+    // If there is a pending subscribe action, cancel the callback
+    this._cancelPendingSubscribeCallback(channel);
+
+    // This operation cannot fail because the TCP protocol guarantees delivery
+    // so long as the connection remains open. If the connection closes,
+    // the server will automatically unsubscribe the socket and thus complete
+    // the operation on the server side.
+    var decoratedChannelName = this._decorateChannelName(channel.name);
+    this.transport.emit('#unsubscribe', decoratedChannelName, options);
+  }
+};
+
+SCSocket.prototype.unsubscribe = function (channelName) {
+
+  var channel = this._channels[channelName];
+
+  if (channel) {
+    if (channel.state != channel.UNSUBSCRIBED) {
+
+      this._triggerChannelUnsubscribe(channel);
+      this._tryUnsubscribe(channel);
+    }
+  }
+};
+
+SCSocket.prototype.channel = function (channelName, options) {
+  var currentChannel = this._channels[channelName];
+
+  if (!currentChannel) {
+    currentChannel = new SCChannel(channelName, this, options);
+    this._channels[channelName] = currentChannel;
+  }
+  return currentChannel;
+};
+
+SCSocket.prototype.destroyChannel = function (channelName) {
+  var channel = this._channels[channelName];
+  channel.unwatch();
+  channel.unsubscribe();
+  delete this._channels[channelName];
+};
+
+SCSocket.prototype.subscriptions = function (includePending) {
+  var subs = [];
+  var channel, includeChannel;
+  for (var channelName in this._channels) {
+    if (this._channels.hasOwnProperty(channelName)) {
+      channel = this._channels[channelName];
+
+      if (includePending) {
+        includeChannel = channel && (channel.state == channel.SUBSCRIBED ||
+          channel.state == channel.PENDING);
+      } else {
+        includeChannel = channel && channel.state == channel.SUBSCRIBED;
+      }
+
+      if (includeChannel) {
+        subs.push(channelName);
+      }
+    }
+  }
+  return subs;
+};
+
+SCSocket.prototype.isSubscribed = function (channelName, includePending) {
+  var channel = this._channels[channelName];
+  if (includePending) {
+    return !!channel && (channel.state == channel.SUBSCRIBED ||
+      channel.state == channel.PENDING);
+  }
+  return !!channel && channel.state == channel.SUBSCRIBED;
+};
+
+SCSocket.prototype.processPendingSubscriptions = function () {
+  var self = this;
+
+  this.pendingConnectCallback = false;
+
+  for (var i in this._channels) {
+    if (this._channels.hasOwnProperty(i)) {
+      (function (channel) {
+        if (channel.state == channel.PENDING) {
+          self._trySubscribe(channel);
+        }
+      })(this._channels[i]);
+    }
+  }
+};
+
+SCSocket.prototype.watch = function (channelName, handler) {
+  if (typeof handler != 'function') {
+    throw new InvalidArgumentsError('No handler function was provided');
+  }
+  this._channelEmitter.on(channelName, handler);
+};
+
+SCSocket.prototype.unwatch = function (channelName, handler) {
+  if (handler) {
+    this._channelEmitter.removeListener(channelName, handler);
+  } else {
+    this._channelEmitter.removeAllListeners(channelName);
+  }
+};
+
+SCSocket.prototype.watchers = function (channelName) {
+  return this._channelEmitter.listeners(channelName);
+};
+
+var scsocket = SCSocket;
+
+var InvalidArgumentsError$2 = index$18.InvalidArgumentsError;
+
+var _connections = {};
+
+function getMultiplexId(options) {
+  var protocolPrefix = options.secure ? 'https://' : 'http://';
+  var queryString = '';
+  if (options.query) {
+    if (typeof options.query == 'string') {
+      queryString = options.query;
+    } else {
+      var queryArray = [];
+      var queryMap = options.query;
+      for (var key in queryMap) {
+        if (queryMap.hasOwnProperty(key)) {
+          queryArray.push(key + '=' + queryMap[key]);
+        }
+      }
+      if (queryArray.length) {
+        queryString = '?' + queryArray.join('&');
+      }
+    }
+  }
+  var host;
+  if (options.host) {
+    host = options.host;
+  } else {
+    host = options.hostname + ':' + options.port;
+  }
+  return protocolPrefix + host + options.path + queryString;
+}
+
+function isUrlSecure() {
+  return commonjsGlobal.location && location.protocol == 'https:';
+}
+
+function getPort(options, isSecureDefault) {
+  var isSecure = options.secure == null ? isSecureDefault : options.secure;
+  return options.port || (commonjsGlobal.location && location.port ? location.port : isSecure ? 443 : 80);
+}
+
+function connect$2(options) {
+  var self = this;
+
+  options = options || {};
+
+  if (options.host && options.port) {
+    throw new InvalidArgumentsError$2('The host option should already include the' +
+      ' port number in the format hostname:port - Because of this, the host and port options' +
+      ' cannot be specified together; use the hostname option instead');
+  }
+
+  var isSecureDefault = isUrlSecure();
+
+  var opts = {
+    port: getPort(options, isSecureDefault),
+    hostname: commonjsGlobal.location && location.hostname,
+    path: '/socketcluster/',
+    secure: isSecureDefault,
+    autoConnect: true,
+    autoReconnect: true,
+    autoProcessSubscriptions: true,
+    connectTimeout: 20000,
+    ackTimeout: 10000,
+    timestampRequests: false,
+    timestampParam: 't',
+    authEngine: null,
+    authTokenName: 'socketCluster.authToken',
+    binaryType: 'arraybuffer',
+    multiplex: true,
+    cloneData: false
+  };
+  for (var i in options) {
+    if (options.hasOwnProperty(i)) {
+      opts[i] = options[i];
+    }
+  }
+  var multiplexId = getMultiplexId(opts);
+  if (opts.multiplex === false) {
+    return new scsocket(opts);
+  }
+  if (_connections[multiplexId]) {
+    _connections[multiplexId].connect();
+  } else {
+    _connections[multiplexId] = new scsocket(opts);
+  }
+  return _connections[multiplexId];
+}
+
+function destroy$1(options) {
+  var self = this;
+
+  options = options || {};
+  var isSecureDefault = isUrlSecure();
+
+  var opts = {
+    port: getPort(options, isSecureDefault),
+    hostname: commonjsGlobal.location && location.hostname,
+    path: '/socketcluster/',
+    secure: isSecureDefault
+  };
+  for (var i in options) {
+    if (options.hasOwnProperty(i)) {
+      opts[i] = options[i];
+    }
+  }
+  var multiplexId = getMultiplexId(opts);
+  var socket = _connections[multiplexId];
+  if (socket) {
+    socket.disconnect();
+  }
+  delete _connections[multiplexId];
+}
+
+var scsocketcreator = {
+  connect: connect$2,
+  destroy: destroy$1,
+  connections: _connections
+};
+
+var SCSocketCreator_1 = scsocketcreator;
+var SCSocket_1 = scsocket;
+
+var SCEmitter = index$12.SCEmitter;
+
+var connect$1 = function (options) {
+  return scsocketcreator.connect(options);
+};
+
+var destroy = function (options) {
+  return scsocketcreator.destroy(options);
+};
+
+var connections = scsocketcreator.connections;
+
+var version = '5.5.2';
+
+var index$10 = {
+	SCSocketCreator: SCSocketCreator_1,
+	SCSocket: SCSocket_1,
+	SCEmitter: SCEmitter,
+	connect: connect$1,
+	destroy: destroy,
+	connections: connections,
+	version: version
+};
+
+var constants = createCommonjsModule(function (module, exports) {
+'use strict';
+
+exports.__esModule = true;
+var defaultSocketOptions = exports.defaultSocketOptions = {
+  secure: true,
+  hostname: 'remotedev.io',
+  port: 443,
+  autoReconnect: true,
+  autoReconnectOptions: {
+    randomness: 60000
+  }
+};
+});
+
+var devTools = createCommonjsModule(function (module, exports) {
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+exports.__esModule = true;
+exports.send = undefined;
+exports.extractState = extractState;
+exports.generateId = generateId;
+exports.start = start;
+exports.connect = connect;
+exports.connectViaExtension = connectViaExtension;
+
+
+
+
+
+var _socketclusterClient2 = _interopRequireDefault(index$10);
+
+
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var socket = undefined;
+var channel = undefined;
+var listeners = {};
+
+function extractState(message) {
+  return message && message.state ? (0, index$6.parse)(message.state) : undefined;
+}
+
+function generateId() {
+  return Math.random().toString(36).substr(2);
+}
+
+function handleMessages(message) {
+  if (!message.payload) message.payload = message.action;
+  Object.keys(listeners).forEach(function (id) {
+    if (message.instanceId && id !== message.instanceId) return;
+    if (typeof listeners[id] === 'function') listeners[id](message);else listeners[id].forEach(function (fn) {
+      fn(message);
+    });
+  });
+}
+
+function watch() {
+  if (channel) return;
+  socket.emit('login', 'master', function (err, channelName) {
+    if (err) {
+      console.log(err);return;
+    }
+    channel = socket.subscribe(channelName);
+    channel.watch(handleMessages);
+    socket.on(channelName, handleMessages);
+  });
+}
+
+function connectToServer(options) {
+  if (socket) return;
+  var socketOptions = undefined;
+  if (options.port) {
+    socketOptions = {
+      port: options.port,
+      hostname: options.hostname || 'localhost',
+      secure: !!options.secure
+    };
+  } else socketOptions = constants.defaultSocketOptions;
+  socket = _socketclusterClient2.default.connect(socketOptions);
+  watch();
+}
+
+function start(options) {
+  if (options) {
+    if (options.port && !options.hostname) {
+      options.hostname = 'localhost';
+    }
+  }
+  connectToServer(options);
+}
+
+function transformAction(action) {
+  if (action.action) return action;
+  var liftedAction = { timestamp: Date.now() };
+  if ((typeof action === 'undefined' ? 'undefined' : _typeof(action)) === 'object') {
+    liftedAction.action = action;
+    if (!action.type) liftedAction.action.type = action.id || action.actionType || 'update';
+  } else if (typeof action === 'undefined') {
+    liftedAction.action = 'update';
+  } else {
+    liftedAction.action = { type: action };
+  }
+  return liftedAction;
+}
+
+function _send(action, state, options, type, instanceId) {
+  start(options);
+  setTimeout(function () {
+    var message = {
+      payload: state ? (0, index$6.stringify)(state) : '',
+      action: type === 'ACTION' ? (0, index$6.stringify)(transformAction(action)) : action,
+      type: type || 'ACTION',
+      id: socket.id,
+      instanceId: instanceId,
+      name: options.name
+    };
+    socket.emit(socket.id ? 'log' : 'log-noid', message);
+  }, 0);
+}
+
+exports.send = _send;
+function connect() {
+  var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+  var id = generateId(options.instanceId);
+  start(options);
+  return {
+    init: function init(state, action) {
+      _send(action || {}, state, options, 'INIT', id);
+    },
+    subscribe: function subscribe(listener) {
+      if (!listener) return undefined;
+      if (!listeners[id]) listeners[id] = [];
+      listeners[id].push(listener);
+
+      return function unsubscribe() {
+        var index = listeners[id].indexOf(listener);
+        listeners[id].splice(index, 1);
+      };
+    },
+    unsubscribe: function unsubscribe() {
+      delete listeners[id];
+    },
+    send: function send(action, payload) {
+      if (action) {
+        _send(action, payload, options, 'ACTION', id);
+      } else {
+        _send(undefined, payload, options, 'STATE', id);
+      }
+    },
+    error: function error(payload) {
+      socket.emit({ type: 'ERROR', payload: payload, id: socket.id, instanceId: id });
+    }
+  };
+}
+
+function connectViaExtension(options) {
+  if (options && options.remote || typeof window === 'undefined' || !window.devToolsExtension) {
+    return connect(options);
+  }
+  return window.devToolsExtension.connect(options);
+}
+
+exports.default = { connect: connect, connectViaExtension: connectViaExtension, send: _send, extractState: extractState, generateId: generateId };
+});
+
+var index$4 = devTools;
+
+var index_1$1 = index$4.connectViaExtension;
+var index_2 = index$4.extractState;
+
+var MsgTypes = function (__exports) {
+  var Start = __exports.Start = "START";
+  var Action = __exports.Action = "ACTION";
+  var Dispatch = __exports.Dispatch = "DISPATCH";
+  return __exports;
+}({});
+var PayloadTypes = function (__exports) {
+  var ImportState = __exports.ImportState = "IMPORT_STATE";
+  var JumpToState = __exports.JumpToState = "JUMP_TO_STATE";
+  var JumpToAction = __exports.JumpToAction = "JUMP_TO_ACTION";
+  return __exports;
+}({});
+var Options = function () {
+  function Options(remote, port, hostname, secure, getActionType, serialize) {
+    babelHelpers.classCallCheck(this, Options);
+    this.remote = remote;
+    this.port = port | 0;
+    this.hostname = hostname;
+    this.secure = secure;
+    this.getActionType = getActionType;
+    this.serialize = serialize;
+  }
+
+  babelHelpers.createClass(Options, [{
+    key: _Symbol.reflection,
+    value: function value() {
+      return {
+        type: "Fable.Import.RemoteDev.Options",
+        interfaces: ["FSharpRecord"],
+        properties: {
+          remote: "boolean",
+          port: "number",
+          hostname: "string",
+          secure: "boolean",
+          getActionType: Option(FableFunction([Any, Any])),
+          serialize: Any
+        }
+      };
+    }
+  }]);
+  return Options;
+}();
+setType("Fable.Import.RemoteDev.Options", Options);
+var Action = function () {
+  function Action(type, fields) {
+    babelHelpers.classCallCheck(this, Action);
+    this.type = type;
+    this.fields = fields;
+  }
+
+  babelHelpers.createClass(Action, [{
+    key: _Symbol.reflection,
+    value: function value() {
+      return {
+        type: "Fable.Import.RemoteDev.Action",
+        interfaces: ["FSharpRecord", "System.IEquatable"],
+        properties: {
+          type: "string",
+          fields: FableArray(Any)
+        }
+      };
+    }
+  }, {
+    key: "Equals",
+    value: function Equals(other) {
+      return equalsRecords(this, other);
+    }
+  }]);
+  return Action;
+}();
+setType("Fable.Import.RemoteDev.Action", Action);
+var LiftedState = function () {
+  function LiftedState(actionsById, computedStates, currentStateIndex, nextActionId) {
+    babelHelpers.classCallCheck(this, LiftedState);
+    this.actionsById = actionsById;
+    this.computedStates = computedStates;
+    this.currentStateIndex = currentStateIndex | 0;
+    this.nextActionId = nextActionId | 0;
+  }
+
+  babelHelpers.createClass(LiftedState, [{
+    key: _Symbol.reflection,
+    value: function value() {
+      return {
+        type: "Fable.Import.RemoteDev.LiftedState",
+        interfaces: ["FSharpRecord", "System.IEquatable"],
+        properties: {
+          actionsById: FableArray(Action),
+          computedStates: FableArray(Any),
+          currentStateIndex: "number",
+          nextActionId: "number"
+        }
+      };
+    }
+  }, {
+    key: "Equals",
+    value: function Equals(other) {
+      return equalsRecords(this, other);
+    }
+  }]);
+  return LiftedState;
+}();
+setType("Fable.Import.RemoteDev.LiftedState", LiftedState);
+var Payload = function () {
+  function Payload(nextLiftedState, type) {
+    babelHelpers.classCallCheck(this, Payload);
+    this.nextLiftedState = nextLiftedState;
+    this.type = type;
+  }
+
+  babelHelpers.createClass(Payload, [{
+    key: _Symbol.reflection,
+    value: function value() {
+      return {
+        type: "Fable.Import.RemoteDev.Payload",
+        interfaces: ["FSharpRecord", "System.IEquatable"],
+        properties: {
+          nextLiftedState: LiftedState,
+          type: "string"
+        }
+      };
+    }
+  }, {
+    key: "Equals",
+    value: function Equals(other) {
+      return equalsRecords(this, other);
+    }
+  }]);
+  return Payload;
+}();
+setType("Fable.Import.RemoteDev.Payload", Payload);
+var Msg$3 = function () {
+  function Msg(state, action, type, payload) {
+    babelHelpers.classCallCheck(this, Msg);
+    this.state = state;
+    this.action = action;
+    this.type = type;
+    this.payload = payload;
+  }
+
+  babelHelpers.createClass(Msg, [{
+    key: _Symbol.reflection,
+    value: function value() {
+      return {
+        type: "Fable.Import.RemoteDev.Msg",
+        interfaces: ["FSharpRecord", "System.IEquatable"],
+        properties: {
+          state: "string",
+          action: Any,
+          type: "string",
+          payload: Payload
+        }
+      };
+    }
+  }, {
+    key: "Equals",
+    value: function Equals(other) {
+      return equalsRecords(this, other);
+    }
+  }]);
+  return Msg;
+}();
+setType("Fable.Import.RemoteDev.Msg", Msg$3);
+
+var Debugger = function (__exports) {
+  var ConnectionOptions = __exports.ConnectionOptions = function () {
+    function ConnectionOptions(tag, data) {
+      babelHelpers.classCallCheck(this, ConnectionOptions);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(ConnectionOptions, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Debug.Debugger.ConnectionOptions",
+          interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
+          cases: [["ViaExtension"], ["Remote", "string", "number"], ["Secure", "string", "number"]]
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return this === other || this.tag === other.tag && equals(this.data, other.data);
+      }
+    }, {
+      key: "CompareTo",
+      value: function CompareTo(other) {
+        return compareUnions(this, other) | 0;
+      }
+    }]);
+    return ConnectionOptions;
+  }();
+
+  setType("Elmish.Debug.Debugger.ConnectionOptions", ConnectionOptions);
+
+  var connect$$1 = __exports.connect = function () {
+    var serialize = {
+      replacer: function replacer(_arg1, v) {
+        return deflate(v);
+      }
+    };
+    var fallback = new Options(true, 443, "remotedev.io", true, function (cmd) {
+      return {
+        type: function () {
+          var matchValue = getUnionFields(cmd, Any);
+          return getName(matchValue[0]);
+        }(),
+        msg: cmd
+      };
+    }, serialize);
+    return function ($var1) {
+      return index_1$1(function (_arg1_1) {
+        if (_arg1_1.tag === 1) {
+          var getActionType = null;
+          return new Options(fallback.remote, _arg1_1.data[1], _arg1_1.data[0], false, getActionType, fallback.serialize);
+        } else if (_arg1_1.tag === 2) {
+          var getActionType_1 = null;
+          return new Options(fallback.remote, _arg1_1.data[1], _arg1_1.data[0], fallback.secure, getActionType_1, fallback.serialize);
+        } else {
+          return new Options(false, 8000, "localhost", false, fallback.getActionType, fallback.serialize);
+        }
+      }($var1));
+    };
+  }();
+
+  return __exports;
+}({});
+var Program$1 = function (__exports) {
+  var withDebuggerUsing = __exports.withDebuggerUsing = function (connection, program, _genArgs) {
+    var init = function init(a) {
+      var patternInput = program.init(a);
+
+      var deflated = function (arg00) {
+        return JSON.parse(arg00);
+      }(toJson(patternInput[0]));
+
+      connection.init(deflated, null);
+      return [patternInput[0], patternInput[1]];
+    };
+
+    var update = function update(msg, model) {
+      var patternInput_1 = program.update(msg, model);
+      connection.send(msg, patternInput_1[0]);
+      return [patternInput_1[0], patternInput_1[1]];
+    };
+
+    var subscribe = function subscribe(model_1) {
+      var sub = function sub(dispatch) {
+        (function (arg00_1) {
+          return connection.subscribe(arg00_1);
+        })(function (_arg1) {
+          if (_arg1.type === "DISPATCH") {
+            try {
+              var matchValue = _arg1.payload.type;
+
+              switch (matchValue) {
+                case "JUMP_TO_ACTION":
+                case "JUMP_TO_STATE":
+                  var state = inflatePublic(function (arg00_2) {
+                    return index_2(arg00_2);
+                  }(_arg1), {
+                    T: _genArgs.model
+                  });
+                  program.setState(state, dispatch);
+                  break;
+
+                case "IMPORT_STATE":
+                  var state_1 = last(_arg1.payload.nextLiftedState.computedStates);
+                  program.setState(inflatePublic(state_1.state, {
+                    T: _genArgs.model
+                  }), dispatch);
+                  connection.send(null, _arg1.payload.nextLiftedState);
+                  break;
+
+                default:}
+            } catch (ex) {
+              console.error("Unable to process monitor command", _arg1, ex);
+            }
+          }
+        });
+      };
+
+      return Cmd.batch(ofArray([ofArray([sub]), program.subscribe(model_1)]));
+    };
+
+    var onError = function onError(tupledArg) {
+      connection.error([tupledArg[0], tupledArg[1]]);
+    };
+
+    return new Program(init, update, subscribe, program.view, program.setState, onError);
+  };
+
+  var withDebuggerAt = __exports.withDebuggerAt = function (options, program, _genArgs) {
+    try {
+      return withDebuggerUsing(Debugger.connect(options), program, {
+        a: _genArgs.a,
+        model: _genArgs.model,
+        msg: _genArgs.msg,
+        view: _genArgs.view
+      });
+    } catch (ex) {
+      console.error("Unable to connect to the monitor, continuing w/o debugger", ex);
+      return program;
+    }
+  };
+
+  var withDebugger = __exports.withDebugger = function (program, _genArgs) {
+    try {
+      return withDebuggerUsing(Debugger.connect(new Debugger.ConnectionOptions(0)), program, {
+        a: _genArgs.a,
+        model: _genArgs.model,
+        msg: _genArgs.msg,
+        view: _genArgs.view
+      });
+    } catch (ex) {
+      console.error("Unable to connect to the monitor, continuing w/o debugger", ex);
+      return program;
+    }
+  };
+
+  return __exports;
+}({});
 
 var options = {
   highlight: function highlight(code) {
@@ -23899,12 +29017,17 @@ ProgramModule.run(withReact("elmish-app", ProgramModule$1.toNavigable(function (
   return parseHash(pageParser, location);
 }, function (result, model) {
   return urlUpdate(result, model);
-}, ProgramModule.mkProgram(function (result_1) {
+}, Program$1.withDebugger(ProgramModule.mkProgram(function (result_1) {
   return init(result_1);
 }, function (msg, model_1) {
   return update(msg, model_1);
 }, function (model_2, dispatch) {
   return root(model_2, dispatch);
+}), {
+  a: Option(Page),
+  model: Model$2,
+  msg: Msg$2,
+  view: Interface("Fable.Import.React.ReactElement")
 }))));
 
 exports.options = options;
