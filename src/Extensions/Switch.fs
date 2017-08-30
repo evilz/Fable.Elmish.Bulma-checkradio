@@ -10,53 +10,63 @@ open Fable.Helpers.React.Props
 open Fable.Import
 open Elmish.Bulma
 
-module Checkbox =
+module Switch =
 
     module Styles =
-        let [<Literal>] Container = "is-checkbox"
-        let [<Literal>] IsCircle = "is-circle"
+        let [<Literal>] Switch = "switch"
+        let [<Literal>] IsRounded = "is-rounded"
+        let [<Literal>] IsOutlined = "is-outlined"
 
 
     module Types =
         type Option =
             | Level of ILevelAndColor
             | Size of ISize
-            | IsCircle
-            | IsChecked
-            | IsDisabled
+            | IsOutlined
+            | IsRounded
+            | IsChecked of bool
+            | IsDisabled of bool
             | Value of string // String ???
             | Label of string
             | Props of IHTMLProp list
-            | OnClick of (React.MouseEvent -> unit) // onchange ...
+            | OnChange of (React.FormEvent -> unit)
             | CustomClass of string
+            | ComponentId of string
+            
         let ofStyles style =
             match style with
-            | IsCircle -> Styles.IsCircle
+            | IsOutlined -> Styles.IsOutlined
+            | IsRounded -> Styles.IsRounded
             | value -> failwithf "%A isn't a valid style value" value
 
 
+        type ComponentId = string
         type Options =
             { Level : string option
               Size : string option
-              IsCircle : bool
+              IsOutlined : bool
+              IsRounded : bool
               IsChecked : bool
               IsDisabled : bool
               Value : string
               Label : string
               Props : IHTMLProp list
               CustomClass : string option
-              OnClick : (React.MouseEvent -> unit) option }
+              OnChange : (React.FormEvent -> unit) option
+              ComponentId: string }
             static member Empty =
                 { Level = None
                   Size = None
-                  IsCircle = false
+                  IsOutlined = false
+                  IsRounded = false
                   IsChecked = false
                   IsDisabled = false
                   Value = ""
                   Label = ""
                   Props = []
                   CustomClass = None
-                  OnClick = None }
+                  OnChange = None
+                  ComponentId = System.Guid.NewGuid() |> sprintf "%O" }
 
     open Types
 
@@ -66,11 +76,12 @@ module Checkbox =
     let isLarge = Size IsLarge
 
     // States
-    let isChecked =  IsChecked
-    let isDisabled = IsDisabled
+    let isChecked =  IsChecked true
+    let isDisabled = IsDisabled true
 
     // Styles
-    let isCircle = IsCircle
+    let isOutlined = IsOutlined
+    let isRounded = IsRounded
 
 
     // Levels and colors
@@ -86,54 +97,54 @@ module Checkbox =
 
     // Label and Value
     let value data  = Value data
-    let withLabel label = Label label
+    let text s = Label s
 
     // Extra
     let props props = Props props
     let customClass = CustomClass
     
+    let onChange cb = OnChange cb
 
-
-    let checkbox (options : Option list) children =
+    let switch (options : Option list) children =
 
 
         let parseOptions (result: Options) opt =
             match opt with
             | Option.Level level -> { result with Level = ofLevelAndColor level |> Some }
             | Size size -> { result with Size = ofSize size |> Some }
-            | IsCircle -> { result with IsCircle = true }
-            | IsChecked -> { result with IsChecked = true }
-            | IsDisabled -> { result with IsDisabled = true }
+            | IsOutlined -> { result with IsOutlined  = true }
+            | IsRounded -> { result with IsRounded  = true }
+            | IsChecked state -> { result with IsChecked = state }
+            | IsDisabled state -> { result with IsDisabled = state }
             | Value value -> { result with Value = value }
             | Label label -> { result with Label = label } 
             | Props props -> { result with Props = props }
             | CustomClass customClass -> { result with CustomClass = Some customClass }
-            | OnClick cb -> { result with OnClick = cb |> Some }
+            | OnChange cb -> { result with OnChange = cb |> Some }
+            | ComponentId customId -> {result with ComponentId = customId }
 
         let opts = options |> List.fold parseOptions Options.Empty
-        let id = System.Guid.NewGuid() |> sprintf "%O"
 
         div [ ClassName "field" ]
             [ input 
                 [ yield classBaseList
-                    (Helpers.generateClassName Styles.Container [ opts.Level; opts.Size; ])
-                     [ Styles.IsCircle, opts.IsCircle
+                    (Helpers.generateClassName Styles.Switch [ opts.Level; opts.Size; ])
+                     [ Styles.IsOutlined, opts.IsOutlined
+                       Styles.IsRounded, opts.IsRounded
                        opts.CustomClass.Value, opts.CustomClass.IsSome ] :> IHTMLProp
-                  if opts.OnClick.IsSome then
-                    yield DOMAttr.OnClick opts.OnClick.Value :> IHTMLProp
+                  if opts.OnChange.IsSome then
+                    yield Checked opts.IsChecked :> IHTMLProp
+                    yield DOMAttr.OnChange opts.OnChange.Value :> IHTMLProp
+                  else
+                    yield DefaultChecked opts.IsChecked :> IHTMLProp
                   yield! opts.Props 
                   yield Type "checkbox" :> IHTMLProp
-                  yield Id id :> IHTMLProp
-                  
-                  if opts.IsChecked then
-                    yield Checked true :> IHTMLProp
-                  
-                  if opts.IsDisabled then
-                    yield Disabled true :> IHTMLProp
+                  yield Id opts.ComponentId :> IHTMLProp
+                  yield Disabled opts.IsDisabled :> IHTMLProp
 
-                  ]
+                ]
 
-              label [ HtmlFor id ] 
+              label [ HtmlFor opts.ComponentId ] 
                     [ match children with
                           | [] -> yield str opts.Label
                           | _ -> yield! children

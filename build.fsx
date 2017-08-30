@@ -139,7 +139,7 @@ let gitHome = sprintf "https://github.com/%s" gitOwner
 
 
 // Where to push generated documentation
-let githubLink = "git@github.com:evilz/Fable.Elmish.Bulma-checkradio.git"
+let githubLink = "https://github.com/evilz/Fable.Elmish.Bulma-checkradio.git"
 let publishBranch = "gh-pages"
 let fableRoot   = __SOURCE_DIRECTORY__
 let temp        = fableRoot </> "temp"

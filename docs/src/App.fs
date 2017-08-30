@@ -4,6 +4,7 @@ open App.State
 open Elmish
 open Elmish.Browser.Navigation
 open Elmish.Browser.UrlParser
+open Elmish.Debug
 open Elmish.Bulma
 open Elmish.Bulma.Components
 open Fable.Core
@@ -44,12 +45,10 @@ let menu currentPage =
           Menu.label [ ] [ str "Elements" ]
           Menu.list [ ]
             [ //menuItem "Home" Home currentPage
-              menuItem "Checkbox" (Element Checkbox) currentPage
-              menuItem "Radio" (Element Radio) currentPage
+              menuItem "Checkradio" (Element Checkradio) currentPage
             ]
         ]
           
-
 let header =
     div [ ClassName "hero is-primary" ]
         [ div [ ClassName "hero-body" ]
@@ -63,9 +62,8 @@ let root model dispatch =
         | Home -> Home.View.root model.Home
         | Element element ->
             match element with
-            | Elements.Checkbox -> Elements.Checkbox.View.root model.Elements.Checkbox (CheckboxMsg >> dispatch)
-            | Elements.Radio -> Elements.Checkbox.View.root model.Elements.Checkbox (CheckboxMsg >> dispatch)
-
+            | Elements.Checkradio -> Elements.Checkradio.View.root model.Elements.Checkradio (CheckradioMsg >> dispatch)
+            
 
     div []
         [ div [ ClassName "navbar-bg" ]
@@ -82,6 +80,7 @@ open Elmish.React
 
 // App
 Program.mkProgram init update root
+|> Program.withDebugger // connect to a devtools monitor via Chrome/Firefox extension if available
 |> Program.toNavigable (parseHash pageParser) urlUpdate
 |> Program.withReact "elmish-app"
 |> Program.run

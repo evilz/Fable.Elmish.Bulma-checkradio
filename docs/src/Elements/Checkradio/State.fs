@@ -1,8 +1,27 @@
-module Elements.Checkbox.State
+module Elements.Checkradio.State
 
 open Elmish
 open Types
 
+let inlineBlockCode =
+       """
+```fsharp
+    // Block
+    yield div [ ClassName "field"] [
+        yield! Checkradio.checkbox [ ] [ str "One" ]
+        
+    ]
+    yield div [ ClassName "field"] [
+        yield! Checkradio.checkbox [ ] [ str "Two" ]
+    ]
+                       
+    // Inline
+    yield div [ ClassName "field"] [
+        yield! Checkradio.checkbox [ ] [ str "One " ]
+        yield! Checkradio.checkbox [ ] [ str "Two " ]
+    ]
+```
+    """ 
 let colorCode =
     """
 ```fsharp
@@ -55,27 +74,24 @@ let mixedStyleCode =
 let stateCode =
     """
 ```fsharp
-    Button.button [ ] [ str "Normal" ]
-    Button.button [ Button.isSuccess; Button.isHovered ] [ str "Hover" ]
-    Button.button [ Button.isWarning; Button.isFocused ] [ str "Focus" ]
-    Button.button [ Button.isInfo; Button.isActive ] [ str "Active" ]
-    Button.button [ Button.isBlack; Button.isLoading ] [ str "Loading" ]
+    Checkradio.checkbox [  Checkradio.isDisabled ] [ str "Disabled" ]
+    Checkradio.checkbox [  Checkradio.isDisabled; Checkradio.isChecked ] [ str "Disabled & Checked" ]
+    Checkradio.checkbox [ ] [ str "Unchecked" ]
+    Checkradio.checkbox [ Checkradio.isChecked;] [ str "checked" ]
 ```
     """
 
-let extraCode =
+let eventCode =
     """
 ```fsharp
-    // For registering a click event, we can use the Button.onClick helper
-    Button.button [ Button.onClick (fun _ -> dispatch Click) ]
-                  [ str buttonTxt ]
-    // Or we can pass any IProps via Button.props
-    // Equivalent of the Button.onClick
-    Button.button [ Button.props [ OnClick (fun _ -> dispatch Click) ] ]
-                  [ str buttonTxt ]
-    // Disabled button
-    Button.button [ Button.props [ Disabled true ] ]
-                  [ str "Fixed width" ]
+    // For registering a change event, we can use the Checkradio.onChange helper
+    yield! Checkradio.checkbox 
+            [ 
+                if model.IsChecked then yield Checkradio.isChecked;  
+                yield Checkradio.onChange (fun x -> dispatch (Change state))
+            ] 
+            [ str  (sprintf "%A" model.IsChecked) ]
+
 ```
     """
 
@@ -91,15 +107,21 @@ The **Checkbox** can have different colors, sizes and states.
 
 
 let init() =
-    { ColorViewer = Viewer.State.init colorCode
+    { InlineBlockViewer = Viewer.State.init inlineBlockCode
+      ColorViewer = Viewer.State.init colorCode
       SizeViewer = Viewer.State.init sizeCode
       CircleViewer = Viewer.State.init circleCode
+      StateViewer = Viewer.State.init stateCode
+      EventViewer = Viewer.State.init eventCode
       Intro = intro
       IsChecked = false
     }
 
 let update msg model =
     match msg with
+    | InlineBlockViewerMsg msg ->
+        let (viewer, viewerMsg) = Viewer.State.update msg model.InlineBlockViewer
+        { model with InlineBlockViewer = viewer }, Cmd.map InlineBlockViewerMsg viewerMsg
     | ColorViewerMsg msg ->
         let (viewer, viewerMsg) = Viewer.State.update msg model.ColorViewer
         { model with ColorViewer = viewer }, Cmd.map ColorViewerMsg viewerMsg
@@ -109,5 +131,11 @@ let update msg model =
     | CircleViewerMsg msg ->
         let (viewer, viewerMsg) = Viewer.State.update msg model.CircleViewer
         { model with CircleViewer = viewer }, Cmd.map CircleViewerMsg viewerMsg
+    | StateViewerMsg msg ->
+        let (viewer, viewerMsg) = Viewer.State.update msg model.StateViewer
+        { model with StateViewer = viewer }, Cmd.map StateViewerMsg viewerMsg
+    | EventViewerMsg msg ->
+        let (viewer, viewerMsg) = Viewer.State.update msg model.EventViewer
+        { model with EventViewer = viewer }, Cmd.map EventViewerMsg viewerMsg
     | Change state -> 
         { model with IsChecked = state }, Cmd.none

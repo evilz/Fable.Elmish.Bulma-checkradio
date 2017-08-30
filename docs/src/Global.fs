@@ -3,8 +3,7 @@ module Global
 open Fable.Core
 
 type Elements =
-    | Checkbox
-    | Radio
+    | Checkradio
 
 
 type Page =
@@ -16,5 +15,4 @@ let toHash page =
     | Home -> "#home"
     | Element element ->
         match element with
-        | Checkbox -> "#elements/checkbox"
-        | Radio -> "#elements/radio"
+        | Checkradio -> "#elements/checkradio"

@@ -7,7 +7,8 @@
   <ItemGroup>
 
     <!-- Elements -->
-    <Compile Include="Elements/Checkbox.fs" />
+    <Compile Include="Extensions/Checkradio.fs" />
+    <Compile Include="Extensions/Switch.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />

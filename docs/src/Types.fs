@@ -3,11 +3,11 @@ module App.Types
 open Global
 
 type Msg =
-    | CheckboxMsg of Elements.Checkbox.Types.Msg
+    | CheckradioMsg of Elements.Checkradio.Types.Msg
 
 
 type ElementsModel =
-    { Checkbox : Elements.Checkbox.Types.Model
+    { Checkradio : Elements.Checkradio.Types.Model
     }
 
 type Model =

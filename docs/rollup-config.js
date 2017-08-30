@@ -5,17 +5,26 @@ import cjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import replace from 'rollup-plugin-replace';
 import postcss from 'rollup-plugin-postcss';
+import builtins from 'rollup-plugin-node-builtins'
 import sass from 'node-sass';
 import babel from "rollup-plugin-babel";
 
 var babelOptions = {
-    presets: [["es2015", { "modules": false }]],
+    presets: [
+        ["es2015", {
+            "modules": false
+        }]
+    ],
     plugins: ["external-helpers"]
 };
 
 const preprocessor = (content, id) => new Promise((resolve, reject) => {
-    const result = sass.renderSync({ file: id });
-    resolve({ code: result.css.toString() });
+    const result = sass.renderSync({
+        file: id
+    });
+    resolve({
+        code: result.css.toString()
+    });
 });
 
 const isWatching = process.argv.some(x => x === "-w");
@@ -31,19 +40,26 @@ let rollupPlugins = [
         include: '../node_modules/**',
         namedExports: {
             'react': ['createElement', 'Component'],
-            'react-dom': ['render']
+            'react-dom': ['render'],
+            'remotedev': ['connectViaExtension', 'extractState', 'connect']
         }
     }),
-    nodeResolve({ jsnext: true, main: true, browser: true }),
-    replace({ 'process.env.NODE_ENV':
-        JSON.stringify(isWatching ? 'development' : 'production')}),
+    builtins(),
+    nodeResolve({
+        jsnext: true,
+        main: true,
+        browser: true,
+        preferBuiltins: true
+    }),
+    replace({
+        'process.env.NODE_ENV': JSON.stringify(isWatching ? 'development' : 'production')
+    }),
     postcss({
-        plugins: [
-        ],
+        plugins: [],
         extract: './public/dist/css/bundle.css', // default value
         preprocessor,
-        extensions: ['.css', '.sass']  // default value
-    })
+        extensions: ['.css', '.sass'] // default value
+    }),
 ];
 
 if (isWatching) {
@@ -54,8 +70,7 @@ if (isWatching) {
             contentBase: 'public',
             port: 8080
         }));
-}
-else {
+} else {
     console.log("Bundling for production...");
 }
 
@@ -64,5 +79,5 @@ export default {
     dest: './public/dist/js/bundle.js',
     plugins: rollupPlugins,
     format: 'iife',
-    moduleName: 'bulmaDocSite'
+    moduleName: 'bulmaDocSite',
 };

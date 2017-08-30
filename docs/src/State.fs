@@ -10,8 +10,7 @@ open Types
 
 let pageParser : Parser<Page -> Page, Page> =
     oneOf [ map Home (s "home")
-            map (Element Checkbox) (s "elements" </> s "checkbox")
-            map (Element Radio) (s "elements" </> s "radio")
+            map (Element Checkradio) (s "elements" </> s "checkradio")
             map Home top ]
 
 let urlUpdate (result : Option<Page>) model =
@@ -24,7 +23,7 @@ let urlUpdate (result : Option<Page>) model =
 
 let init result =
     let elements =
-        { Checkbox = Elements.Checkbox.State.init ()
+        { Checkradio = Elements.Checkradio.State.init ()
         }
 
 
@@ -41,9 +40,9 @@ open Fable.Helpers.React.Props
 
 let update msg model =
     match msg with
-    | CheckboxMsg msg ->
-        let (checkbox, checkboxMsg) = Elements.Checkbox.State.update msg model.Elements.Checkbox
+    | CheckradioMsg msg ->
+        let (checkradio, checkboxMsg) = Elements.Checkradio.State.update msg model.Elements.Checkradio
         { model with Elements =
-                        { model.Elements with Checkbox = checkbox } }, Cmd.map CheckboxMsg checkboxMsg
+                        { model.Elements with Checkradio = checkradio } }, Cmd.map CheckradioMsg checkboxMsg
 
     
