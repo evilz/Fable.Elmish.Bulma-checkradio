@@ -4673,7 +4673,7 @@ var Elements = function () {
       return {
         type: "Global.Elements",
         interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-        cases: [["Checkbox"], ["Radio"]]
+        cases: [["Checkradio"]]
       };
     }
   }, {
@@ -4722,11 +4722,7 @@ var Page = function () {
 setType("Global.Page", Page);
 function toHash(page) {
   if (page.tag === 1) {
-    if (page.data.tag === 1) {
-      return "#elements/radio";
-    } else {
-      return "#elements/checkbox";
-    }
+    return "#elements/checkradio";
   } else {
     return "#home";
   }
@@ -5340,12 +5336,76 @@ var Bulma = function (__exports) {
     return __exports;
   }({});
 
+  var Navbar = __exports.Navbar = function (__exports) {
+    var Container_25 = __exports.Container = "navbar";
+    var Brand = __exports.Brand = "navbar-brand";
+    var Burger = __exports.Burger = "navbar-burger";
+    var Content_2 = __exports.Content = "navbar-content";
+    var Divider = __exports.Divider = "navbar-divider";
+    var Start = __exports.Start = "navbar-start";
+    var End = __exports.End = "navbar-end";
+
+    var Item = __exports.Item = function (__exports) {
+      var Container_26 = __exports.Container = "navbar-item";
+      var IsHoverable = __exports.IsHoverable = "is-hoverable";
+      var State_5 = __exports.State = genericIsActiveState;
+
+      var Style = __exports.Style = function (__exports) {
+        var HasDropdown = __exports.HasDropdown = "has-dropdown";
+        var IsTab_1 = __exports.IsTab = "is-tab";
+        return __exports;
+      }({});
+
+      return __exports;
+    }({});
+
+    var Menu = __exports.Menu = function (__exports) {
+      var Container_27 = __exports.Container = "navbar-menu";
+      var State_6 = __exports.State = genericIsActiveState;
+      return __exports;
+    }({});
+
+    var Link = __exports.Link = function (__exports) {
+      var Container_28 = __exports.Container = "navbar-link";
+      var State_7 = __exports.State = genericIsActiveState;
+      return __exports;
+    }({});
+
+    var Dropdown = __exports.Dropdown = function (__exports) {
+      var Container_29 = __exports.Container = "navbar-dropdown";
+      var State_8 = __exports.State = genericIsActiveState;
+      var IsBoxed = __exports.IsBoxed = "is-boxed";
+      var IsRight_1 = __exports.IsRight = "is-right";
+      return __exports;
+    }({});
+
+    var Style = __exports.Style = function (__exports) {
+      var HasShadow_1 = __exports.HasShadow = "has-shadow";
+      var IsTransparent = __exports.IsTransparent = "is-transparent";
+      return __exports;
+    }({});
+
+    return __exports;
+  }({});
+
+  var Notification = __exports.Notification = function (__exports) {
+    var Container_30 = __exports.Container = "notification";
+    var Color_4 = __exports.Color = levelAndColor;
+
+    var Delete = __exports.Delete = function (__exports) {
+      var Container_31 = __exports.Container = "delete";
+      return __exports;
+    }({});
+
+    return __exports;
+  }({});
+
   var Panel = __exports.Panel = function (__exports) {
-    var Container_25 = __exports.Container = "panel";
+    var Container_32 = __exports.Container = "panel";
     var Heading = __exports.Heading = "panel-heading";
 
     var Tabs = __exports.Tabs = function (__exports) {
-      var Container_26 = __exports.Container = "panel-tabs";
+      var Container_33 = __exports.Container = "panel-tabs";
 
       var Tab = __exports.Tab = function (__exports) {
         var State = __exports.State = function (__exports) {
@@ -5360,7 +5420,7 @@ var Bulma = function (__exports) {
     }({});
 
     var Block = __exports.Block = function (__exports) {
-      var Container_27 = __exports.Container = "panel-block";
+      var Container_34 = __exports.Container = "panel-block";
       var Icon_1 = __exports.Icon = "panel-icon";
       var List_1 = __exports.List = "panel-list";
 
@@ -5369,6 +5429,50 @@ var Bulma = function (__exports) {
         return __exports;
       }({});
 
+      return __exports;
+    }({});
+
+    return __exports;
+  }({});
+
+  var Tabs = __exports.Tabs = function (__exports) {
+    var Container_35 = __exports.Container = "tabs";
+    var State_9 = __exports.State = genericIsActiveState;
+    var Size_7 = __exports.Size = standardSize;
+
+    var Alignment = __exports.Alignment = function (__exports) {
+      var Center_1 = __exports.Center = "is-centered";
+      var Right_7 = __exports.Right = "is-right";
+      return __exports;
+    }({});
+
+    var Style = __exports.Style = function (__exports) {
+      var IsBoxed_1 = __exports.IsBoxed = "is-boxed";
+      var IsToggle = __exports.IsToggle = "is-toggle";
+      var IsFullwidth_1 = __exports.IsFullwidth = "is-fullwidth";
+      return __exports;
+    }({});
+
+    return __exports;
+  }({});
+
+  var Pagination = __exports.Pagination = function (__exports) {
+    var Container_36 = __exports.Container = "pagination";
+    var Previous = __exports.Previous = "pagination-previous";
+    var Next = __exports.Next = "pagination-next";
+    var Link_1 = __exports.Link = "pagination-link";
+    var Ellipsis = __exports.Ellipsis = "pagination-ellipsis";
+    var List_2 = __exports.List = "pagination-list";
+    var Size_8 = __exports.Size = standardSize;
+
+    var Alignment = __exports.Alignment = function (__exports) {
+      var Center_2 = __exports.Center = "is-centered";
+      var Right_8 = __exports.Right = "is-right";
+      return __exports;
+    }({});
+
+    var State = __exports.State = function (__exports) {
+      var IsCurrent = __exports.IsCurrent = "is-current";
       return __exports;
     }({});
 
@@ -5392,7 +5496,7 @@ var Bulma = function (__exports) {
 
     var Sizing = __exports.Sizing = function (__exports) {
       var IsOverlay = __exports.IsOverlay = "is-overlay";
-      var IsFullwidth_1 = __exports.IsFullwidth = "is-fullwidth";
+      var IsFullwidth_2 = __exports.IsFullwidth = "is-fullwidth";
       var IsMarginless = __exports.IsMarginless = "is-marginless";
       var IsPaddingless = __exports.IsPaddingless = "is-paddingless";
       return __exports;
@@ -5421,9 +5525,9 @@ var Bulma = function (__exports) {
   }({});
 
   var Progress = __exports.Progress = function (__exports) {
-    var Container_28 = __exports.Container = "progress";
-    var Size_7 = __exports.Size = standardSize;
-    var Color_4 = __exports.Color = levelAndColor;
+    var Container_37 = __exports.Container = "progress";
+    var Size_9 = __exports.Size = standardSize;
+    var Color_5 = __exports.Color = levelAndColor;
     return __exports;
   }({});
 
@@ -5450,19 +5554,19 @@ var Bulma = function (__exports) {
   }({});
 
   var Hero = __exports.Hero = function (__exports) {
-    var Container_29 = __exports.Container = "hero";
+    var Container_38 = __exports.Container = "hero";
     var Head = __exports.Head = "hero-head";
     var Body_2 = __exports.Body = "hero-body";
     var Foot = __exports.Foot = "hero-foot";
 
     var Video = __exports.Video = function (__exports) {
-      var Container_30 = __exports.Container = "hero-video";
-      var IsTransparent = __exports.IsTransparent = "is-transparent";
+      var Container_39 = __exports.Container = "hero-video";
+      var IsTransparent_1 = __exports.IsTransparent = "is-transparent";
       return __exports;
     }({});
 
     var Buttons = __exports.Buttons = function (__exports) {
-      var Container_31 = __exports.Container = "hero-buttons";
+      var Container_40 = __exports.Container = "hero-buttons";
       return __exports;
     }({});
 
@@ -5479,12 +5583,12 @@ var Bulma = function (__exports) {
       return __exports;
     }({});
 
-    var Color_5 = __exports.Color = levelAndColor;
+    var Color_6 = __exports.Color = levelAndColor;
     return __exports;
   }({});
 
   var Table = __exports.Table = function (__exports) {
-    var Container_32 = __exports.Container = "table";
+    var Container_41 = __exports.Container = "table";
 
     var Row = __exports.Row = function (__exports) {
       var State = __exports.State = function (__exports) {
@@ -5510,7 +5614,7 @@ var Bulma = function (__exports) {
   }({});
 
   var Tag = __exports.Tag = function (__exports) {
-    var Container_33 = __exports.Container = "tag";
+    var Container_42 = __exports.Container = "tag";
 
     var Size = __exports.Size = function (__exports) {
       var IsMedium_2 = __exports.IsMedium = "is-medium";
@@ -5518,7 +5622,7 @@ var Bulma = function (__exports) {
       return __exports;
     }({});
 
-    var Color_6 = __exports.Color = levelAndColor;
+    var Color_7 = __exports.Color = levelAndColor;
     return __exports;
   }({});
 
@@ -8101,7 +8205,8 @@ function column(options, children) {
 }
 
 var Styles = function (__exports) {
-  var Container = __exports.Container = "is-checkbox";
+  var IsCheckox = __exports.IsCheckox = "is-checkbox";
+  var IsRadio = __exports.IsRadio = "is-radio";
   var IsCircle = __exports.IsCircle = "is-circle";
   return __exports;
 }({});
@@ -8117,18 +8222,18 @@ var Types$2 = function (__exports) {
       key: _Symbol.reflection,
       value: function value() {
         return {
-          type: "Elmish.Bulma.Extensions.Checkbox.Types.Option",
+          type: "Elmish.Bulma.Extensions.Checkradio.Types.Option",
           interfaces: ["FSharpUnion"],
           cases: [["Level", ILevelAndColor], ["Size", ISize], ["IsCircle"], ["IsChecked", "boolean"], ["IsDisabled", "boolean"], ["Value", "string"], ["Label", "string"], ["Props", makeGeneric(List$1, {
             T: Interface("Fable.Helpers.React.Props.IHTMLProp")
-          })], ["OnChange", FableFunction([Interface("Fable.Import.React.FormEvent"), Unit])], ["CustomClass", "string"], ["ComponentId", "string"]]
+          })], ["OnChange", FableFunction([Interface("Fable.Import.React.FormEvent"), Unit])], ["CustomClass", "string"], ["ComponentId", "string"], ["Name", "string"]]
         };
       }
     }]);
     return Option$$1;
   }();
 
-  setType("Elmish.Bulma.Extensions.Checkbox.Types.Option", Option$$1);
+  setType("Elmish.Bulma.Extensions.Checkradio.Types.Option", Option$$1);
 
   var ofStyles = __exports.ofStyles = function (style) {
     if (style.tag === 2) {
@@ -8144,7 +8249,7 @@ var Types$2 = function (__exports) {
   };
 
   var Options = __exports.Options = function () {
-    function Options(level, size, isCircle, isChecked, isDisabled, value, label, props, customClass, onChange, componentId) {
+    function Options(level, size, isCircle, isChecked, isDisabled, value, label, name, props, customClass, onChange, componentId) {
       babelHelpers.classCallCheck(this, Options);
       this.Level = level;
       this.Size = size;
@@ -8153,6 +8258,7 @@ var Types$2 = function (__exports) {
       this.IsDisabled = isDisabled;
       this.Value = value;
       this.Label = label;
+      this.Name = name;
       this.Props = props;
       this.CustomClass = customClass;
       this.OnChange = onChange;
@@ -8163,7 +8269,7 @@ var Types$2 = function (__exports) {
       key: _Symbol.reflection,
       value: function value() {
         return {
-          type: "Elmish.Bulma.Extensions.Checkbox.Types.Options",
+          type: "Elmish.Bulma.Extensions.Checkradio.Types.Options",
           interfaces: ["FSharpRecord"],
           properties: {
             Level: Option("string"),
@@ -8173,6 +8279,7 @@ var Types$2 = function (__exports) {
             IsDisabled: "boolean",
             Value: "string",
             Label: "string",
+            Name: "string",
             Props: makeGeneric(List$1, {
               T: Interface("Fable.Helpers.React.Props.IHTMLProp")
             }),
@@ -8185,7 +8292,7 @@ var Types$2 = function (__exports) {
     }], [{
       key: "Empty",
       get: function get() {
-        return new Options(null, null, false, false, false, "", "", new List$1(), null, null, {
+        return new Options(null, null, false, false, false, "", "", "", new List$1(), null, null, {
           formatFn: fsFormat("%O"),
           input: "%O"
         }.formatFn(function (x) {
@@ -8196,7 +8303,7 @@ var Types$2 = function (__exports) {
     return Options;
   }();
 
-  setType("Elmish.Bulma.Extensions.Checkbox.Types.Options", Options);
+  setType("Elmish.Bulma.Extensions.Checkradio.Types.Options", Options);
   return __exports;
 }({});
 var isSmall = new Types$2.Option(1, new ISize(0));
@@ -8217,6 +8324,10 @@ var isDanger = new Types$2.Option(0, new ILevelAndColor(8));
 
 
 
+function name(customName) {
+  return new Types$2.Option(11, customName);
+}
+
 
 function onChange(cb) {
   return new Types$2.Option(8, cb);
@@ -8225,29 +8336,31 @@ function checkbox(options, children) {
   var parseOptions = function parseOptions(result, opt) {
     if (opt.tag === 1) {
       var Size = ofSize(opt.data);
-      return new Types$2.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 2) {
-      return new Types$2.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 3) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, opt.data, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, opt.data, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 4) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, opt.data, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, opt.data, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 5) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 6) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 11) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 7) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, opt.data, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 9) {
       var CustomClass = opt.data;
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 8) {
       var OnChange = opt.data;
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, OnChange, result.ComponentId);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, OnChange, result.ComponentId);
     } else if (opt.tag === 10) {
-      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, opt.data);
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, opt.data);
     } else {
-      return new Types$2.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$2.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     }
   };
 
@@ -8258,9 +8371,7 @@ function checkbox(options, children) {
     };
   }()(options);
 
-  return react_1("div", {
-    className: "field"
-  }, react_1("input", createObj(toList(delay(function () {
+  return ofArray([react_1("input", createObj(toList(delay(function () {
     return append$1(singleton$1(classBaseList(join(" ", new List$1("is-checkbox", map(function (x) {
       return x;
     }, filter(function (x_1) {
@@ -8288,7 +8399,78 @@ function checkbox(options, children) {
     htmlFor: opts.ComponentId
   }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
     return children.tail == null ? singleton$1(opts.Label) : children;
-  }))))));
+  })))))]);
+}
+function radio(options, children) {
+  var parseOptions = function parseOptions(result, opt) {
+    if (opt.tag === 1) {
+      var Size = ofSize(opt.data);
+      return new Types$2.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 2) {
+      return new Types$2.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 3) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, opt.data, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 4) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, opt.data, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 5) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 6) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 11) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 7) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, opt.data, result.CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 9) {
+      var CustomClass = opt.data;
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, CustomClass, result.OnChange, result.ComponentId);
+    } else if (opt.tag === 8) {
+      var OnChange = opt.data;
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, OnChange, result.ComponentId);
+    } else if (opt.tag === 10) {
+      return new Types$2.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, opt.data);
+    } else {
+      return new Types$2.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+    }
+  };
+
+  var opts = function () {
+    var state = Types$2.Options.Empty;
+    return function (list) {
+      return fold$1(parseOptions, state, list);
+    };
+  }()(options);
+
+  return ofArray([react_1("input", createObj(toList(delay(function () {
+    return append$1(singleton$1(classBaseList(join(" ", new List$1("is-radio", map(function (x) {
+      return x;
+    }, filter(function (x_1) {
+      return function () {
+        return x_1 != null;
+      }();
+    }, ofArray([opts.Level, opts.Size]))))), ofArray([["is-circle", opts.IsCircle], [opts.CustomClass, function () {
+      return opts.CustomClass != null;
+    }()]]))), delay(function () {
+      return append$1(function () {
+        return opts.OnChange != null;
+      }() ? append$1(singleton$1(new Props.HTMLAttr(20, opts.IsChecked)), delay(function () {
+        return singleton$1(new Props.DOMAttr(9, opts.OnChange));
+      })) : singleton$1(new Props.HTMLAttr(0, opts.IsChecked)), delay(function () {
+        return append$1(opts.Props, delay(function () {
+          return append$1(singleton$1(new Props.HTMLAttr(116, "radio")), delay(function () {
+            return append$1(singleton$1(new Props.HTMLAttr(56, opts.ComponentId)), delay(function () {
+              return append$1(opts.Name !== "" ? singleton$1(new Props.HTMLAttr(80, opts.Name)) : empty(), delay(function () {
+                return singleton$1(new Props.HTMLAttr(37, opts.IsDisabled));
+              }));
+            }));
+          }));
+        }));
+      }));
+    }));
+  })), 1)), react_1.apply(undefined, ["label", {
+    htmlFor: opts.ComponentId
+  }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+    return children.tail == null ? singleton$1(opts.Label) : children;
+  })))))]);
 }
 
 var Model$1 = function () {
@@ -8356,13 +8538,15 @@ var Msg$1 = function () {
 setType("Viewer.Types.Msg", Msg$1);
 
 var Model = function () {
-  function Model(intro, colorViewer, sizeViewer, circleViewer, stateViewer, isChecked) {
+  function Model(intro, inlineBlockViewer, colorViewer, sizeViewer, circleViewer, stateViewer, eventViewer, isChecked) {
     babelHelpers.classCallCheck(this, Model);
     this.Intro = intro;
+    this.InlineBlockViewer = inlineBlockViewer;
     this.ColorViewer = colorViewer;
     this.SizeViewer = sizeViewer;
     this.CircleViewer = circleViewer;
     this.StateViewer = stateViewer;
+    this.EventViewer = eventViewer;
     this.IsChecked = isChecked;
   }
 
@@ -8370,14 +8554,16 @@ var Model = function () {
     key: _Symbol.reflection,
     value: function value() {
       return {
-        type: "Elements.Checkbox.Types.Model",
+        type: "Elements.Checkradio.Types.Model",
         interfaces: ["FSharpRecord", "System.IEquatable", "System.IComparable"],
         properties: {
           Intro: "string",
+          InlineBlockViewer: Model$1,
           ColorViewer: Model$1,
           SizeViewer: Model$1,
           CircleViewer: Model$1,
           StateViewer: Model$1,
+          EventViewer: Model$1,
           IsChecked: "boolean"
         }
       };
@@ -8395,7 +8581,7 @@ var Model = function () {
   }]);
   return Model;
 }();
-setType("Elements.Checkbox.Types.Model", Model);
+setType("Elements.Checkradio.Types.Model", Model);
 var Msg = function () {
   function Msg(tag, data) {
     babelHelpers.classCallCheck(this, Msg);
@@ -8407,9 +8593,9 @@ var Msg = function () {
     key: _Symbol.reflection,
     value: function value() {
       return {
-        type: "Elements.Checkbox.Types.Msg",
+        type: "Elements.Checkradio.Types.Msg",
         interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-        cases: [["ColorViewerMsg", Msg$1], ["SizeViewerMsg", Msg$1], ["CircleViewerMsg", Msg$1], ["Change", "boolean"]]
+        cases: [["InlineBlockViewerMsg", Msg$1], ["ColorViewerMsg", Msg$1], ["SizeViewerMsg", Msg$1], ["CircleViewerMsg", Msg$1], ["StateViewerMsg", Msg$1], ["EventViewerMsg", Msg$1], ["Change", "boolean"]]
       };
     }
   }, {
@@ -8425,23 +8611,23 @@ var Msg = function () {
   }]);
   return Msg;
 }();
-setType("Elements.Checkbox.Types.Msg", Msg);
+setType("Elements.Checkradio.Types.Msg", Msg);
 
 var Types$3 = function (__exports) {
-  var ISize$$1 = __exports.ISize = function () {
-    function ISize$$1(tag, data) {
-      babelHelpers.classCallCheck(this, ISize$$1);
+  var IPosition = __exports.IPosition = function () {
+    function IPosition(tag, data) {
+      babelHelpers.classCallCheck(this, IPosition);
       this.tag = tag;
       this.data = data;
     }
 
-    babelHelpers.createClass(ISize$$1, [{
+    babelHelpers.createClass(IPosition, [{
       key: _Symbol.reflection,
       value: function value() {
         return {
-          type: "Elmish.Bulma.Elements.Button.Types.ISize",
+          type: "Elmish.Bulma.Elements.Icon.Types.IPosition",
           interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-          cases: [["IsSmall"], ["IsMedium"], ["IsLarge"], ["IsFullWidth"], ["Nothing"]]
+          cases: [["Left"], ["Right"]]
         };
       }
     }, {
@@ -8455,42 +8641,10 @@ var Types$3 = function (__exports) {
         return compareUnions(this, other) | 0;
       }
     }]);
-    return ISize$$1;
+    return IPosition;
   }();
 
-  setType("Elmish.Bulma.Elements.Button.Types.ISize", ISize$$1);
-
-  var IState = __exports.IState = function () {
-    function IState(tag, data) {
-      babelHelpers.classCallCheck(this, IState);
-      this.tag = tag;
-      this.data = data;
-    }
-
-    babelHelpers.createClass(IState, [{
-      key: _Symbol.reflection,
-      value: function value() {
-        return {
-          type: "Elmish.Bulma.Elements.Button.Types.IState",
-          interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-          cases: [["IsHovered"], ["IsFocused"], ["IsActive"], ["IsLoading"], ["Nothing"]]
-        };
-      }
-    }, {
-      key: "Equals",
-      value: function Equals(other) {
-        return this === other || this.tag === other.tag && equals(this.data, other.data);
-      }
-    }, {
-      key: "CompareTo",
-      value: function CompareTo(other) {
-        return compareUnions(this, other) | 0;
-      }
-    }]);
-    return IState;
-  }();
-
-  setType("Elmish.Bulma.Elements.Button.Types.IState", IState);
+  setType("Elmish.Bulma.Elements.Icon.Types.IPosition", IPosition);
 
   var Option$$1 = __exports.Option = function () {
     function Option$$1(tag, data) {
@@ -8503,236 +8657,11 @@ var Types$3 = function (__exports) {
       key: _Symbol.reflection,
       value: function value() {
         return {
-          type: "Elmish.Bulma.Elements.Button.Types.Option",
-          interfaces: ["FSharpUnion"],
-          cases: [["Level", ILevelAndColor], ["Size", ISize$$1], ["IsOutlined"], ["IsInverted"], ["IsLink"], ["State", IState], ["Props", makeGeneric(List$1, {
-            T: Interface("Fable.Helpers.React.Props.IHTMLProp")
-          })], ["OnClick", FableFunction([Interface("Fable.Import.React.MouseEvent"), Unit])], ["CustomClass", "string"]]
-        };
-      }
-    }]);
-    return Option$$1;
-  }();
-
-  setType("Elmish.Bulma.Elements.Button.Types.Option", Option$$1);
-
-  var ofSize$$1 = __exports.ofSize = function (size) {
-    if (size.tag === 1) {
-      return "is-medium";
-    } else if (size.tag === 2) {
-      return "is-large ";
-    } else if (size.tag === 3) {
-      return "is-fullwidth";
-    } else if (size.tag === 4) {
-      return "";
-    } else {
-      return "is-small";
-    }
-  };
-
-  var ofStyles = __exports.ofStyles = function (style) {
-    if (style.tag === 2) {
-      return "is-outlined";
-    } else if (style.tag === 3) {
-      return "is-inverted";
-    } else if (style.tag === 4) {
-      return "is-link";
-    } else {
-      return {
-        formatFn: fsFormat("%A isn't a valid style value"),
-        input: "%A isn't a valid style value"
-      }.formatFn(function (x) {
-        throw new Error(x);
-      })(style);
-    }
-  };
-
-  var ofState = __exports.ofState = function (state) {
-    if (state.tag === 0) {
-      return "is-hovered";
-    } else if (state.tag === 1) {
-      return "is-focus";
-    } else if (state.tag === 2) {
-      return "is-active";
-    } else if (state.tag === 3) {
-      return "is-loading";
-    } else {
-      return "";
-    }
-  };
-
-  var Options = __exports.Options = function () {
-    function Options(level, size, isOutlined, isInverted, isLink, state, props, customClass, onClick) {
-      babelHelpers.classCallCheck(this, Options);
-      this.Level = level;
-      this.Size = size;
-      this.IsOutlined = isOutlined;
-      this.IsInverted = isInverted;
-      this.IsLink = isLink;
-      this.State = state;
-      this.Props = props;
-      this.CustomClass = customClass;
-      this.OnClick = onClick;
-    }
-
-    babelHelpers.createClass(Options, [{
-      key: _Symbol.reflection,
-      value: function value() {
-        return {
-          type: "Elmish.Bulma.Elements.Button.Types.Options",
-          interfaces: ["FSharpRecord"],
-          properties: {
-            Level: Option("string"),
-            Size: Option("string"),
-            IsOutlined: "boolean",
-            IsInverted: "boolean",
-            IsLink: "boolean",
-            State: Option("string"),
-            Props: makeGeneric(List$1, {
-              T: Interface("Fable.Helpers.React.Props.IHTMLProp")
-            }),
-            CustomClass: Option("string"),
-            OnClick: Option(FableFunction([Interface("Fable.Import.React.MouseEvent"), Unit]))
-          }
-        };
-      }
-    }], [{
-      key: "Empty",
-      get: function get() {
-        return new Options(null, null, false, false, false, null, new List$1(), null, null);
-      }
-    }]);
-    return Options;
-  }();
-
-  setType("Elmish.Bulma.Elements.Button.Types.Options", Options);
-  return __exports;
-}({});
-var isSmall$1 = new Types$3.Option(1, new Types$3.ISize(0));
-var isMedium$1 = new Types$3.Option(1, new Types$3.ISize(1));
-var isLarge$1 = new Types$3.Option(1, new Types$3.ISize(2));
-var isFullWidth = new Types$3.Option(1, new Types$3.ISize(3));
-var isHovered = new Types$3.Option(5, new Types$3.IState(0));
-var isFocused = new Types$3.Option(5, new Types$3.IState(1));
-var isActive = new Types$3.Option(5, new Types$3.IState(2));
-var isLoading = new Types$3.Option(5, new Types$3.IState(3));
-var isOutlined = new Types$3.Option(2);
-var isInverted = new Types$3.Option(3);
-var isLink = new Types$3.Option(4);
-var isBlack$1 = new Types$3.Option(0, new ILevelAndColor(0));
-var isDark$1 = new Types$3.Option(0, new ILevelAndColor(1));
-var isLight$1 = new Types$3.Option(0, new ILevelAndColor(2));
-var isWhite$1 = new Types$3.Option(0, new ILevelAndColor(3));
-var isPrimary$1 = new Types$3.Option(0, new ILevelAndColor(4));
-var isInfo$1 = new Types$3.Option(0, new ILevelAndColor(5));
-var isSuccess$1 = new Types$3.Option(0, new ILevelAndColor(6));
-var isWarning$1 = new Types$3.Option(0, new ILevelAndColor(7));
-var isDanger$1 = new Types$3.Option(0, new ILevelAndColor(8));
-
-
-
-function button(options, children) {
-  var parseOptions = function parseOptions(result, opt) {
-    if (opt.tag === 1) {
-      var Size = Types$3.ofSize(opt.data);
-      return new Types$3.Options(result.Level, Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, result.Props, result.CustomClass, result.OnClick);
-    } else if (opt.tag === 2) {
-      return new Types$3.Options(result.Level, result.Size, true, result.IsInverted, result.IsLink, result.State, result.Props, result.CustomClass, result.OnClick);
-    } else if (opt.tag === 3) {
-      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, true, result.IsLink, result.State, result.Props, result.CustomClass, result.OnClick);
-    } else if (opt.tag === 4) {
-      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, true, result.State, result.Props, result.CustomClass, result.OnClick);
-    } else if (opt.tag === 5) {
-      var State = Types$3.ofState(opt.data);
-      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, result.IsLink, State, result.Props, result.CustomClass, result.OnClick);
-    } else if (opt.tag === 6) {
-      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, opt.data, result.CustomClass, result.OnClick);
-    } else if (opt.tag === 8) {
-      var CustomClass = opt.data;
-      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, result.Props, CustomClass, result.OnClick);
-    } else if (opt.tag === 7) {
-      var OnClick = opt.data;
-      return new Types$3.Options(result.Level, result.Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, result.Props, result.CustomClass, OnClick);
-    } else {
-      return new Types$3.Options(ofLevelAndColor(opt.data), result.Size, result.IsOutlined, result.IsInverted, result.IsLink, result.State, result.Props, result.CustomClass, result.OnClick);
-    }
-  };
-
-  var opts = function () {
-    var state = Types$3.Options.Empty;
-    return function (list) {
-      return fold$1(parseOptions, state, list);
-    };
-  }()(options);
-
-  return react_1.apply(undefined, ["a", createObj(toList(delay(function () {
-    return append$1(singleton$1(classBaseList(join(" ", new List$1("button", map(function (x) {
-      return x;
-    }, filter(function (x_1) {
-      return function () {
-        return x_1 != null;
-      }();
-    }, ofArray([opts.Level, opts.Size, opts.State]))))), ofArray([["is-outlined", opts.IsOutlined], ["is-inverted", opts.IsInverted], ["is-link", opts.IsLink], [opts.CustomClass, function () {
-      return opts.CustomClass != null;
-    }()]]))), delay(function () {
-      return append$1(function () {
-        return opts.OnClick != null;
-      }() ? singleton$1(new Props.DOMAttr(39, opts.OnClick)) : empty(), delay(function () {
-        return opts.Props;
-      }));
-    }));
-  })), 1)].concat(babelHelpers.toConsumableArray(children)));
-}
-
-var Types$4 = function (__exports) {
-  var ITagSize = __exports.ITagSize = function () {
-    function ITagSize(tag, data) {
-      babelHelpers.classCallCheck(this, ITagSize);
-      this.tag = tag;
-      this.data = data;
-    }
-
-    babelHelpers.createClass(ITagSize, [{
-      key: _Symbol.reflection,
-      value: function value() {
-        return {
-          type: "Elmish.Bulma.Elements.Tag.Types.ITagSize",
-          interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-          cases: [["IsMedium"], ["IsLarge"]]
-        };
-      }
-    }, {
-      key: "Equals",
-      value: function Equals(other) {
-        return this === other || this.tag === other.tag && equals(this.data, other.data);
-      }
-    }, {
-      key: "CompareTo",
-      value: function CompareTo(other) {
-        return compareUnions(this, other) | 0;
-      }
-    }]);
-    return ITagSize;
-  }();
-
-  setType("Elmish.Bulma.Elements.Tag.Types.ITagSize", ITagSize);
-
-  var Option$$1 = __exports.Option = function () {
-    function Option$$1(tag, data) {
-      babelHelpers.classCallCheck(this, Option$$1);
-      this.tag = tag;
-      this.data = data;
-    }
-
-    babelHelpers.createClass(Option$$1, [{
-      key: _Symbol.reflection,
-      value: function value() {
-        return {
-          type: "Elmish.Bulma.Elements.Tag.Types.Option",
+          type: "Elmish.Bulma.Elements.Icon.Types.Option",
           interfaces: ["FSharpUnion", "System.IEquatable"],
-          cases: [["Size", ITagSize], ["Color", ILevelAndColor], ["Props", makeGeneric(List$1, {
+          cases: [["Size", ISize], ["Position", IPosition], ["CustomClass", "string"], ["Props", makeGeneric(List$1, {
             T: Interface("Fable.Helpers.React.Props.IHTMLProp")
-          })], ["CustomClass", "string"]]
+          })]]
         };
       }
     }, {
@@ -8744,38 +8673,30 @@ var Types$4 = function (__exports) {
     return Option$$1;
   }();
 
-  setType("Elmish.Bulma.Elements.Tag.Types.Option", Option$$1);
-
-  var ofTagSize = __exports.ofTagSize = function (size) {
-    if (size.tag === 1) {
-      return "is-large";
-    } else {
-      return "is-medium";
-    }
-  };
+  setType("Elmish.Bulma.Elements.Icon.Types.Option", Option$$1);
 
   var Options = __exports.Options = function () {
-    function Options(size, color, props, customClass) {
+    function Options(size, position, customClass, props) {
       babelHelpers.classCallCheck(this, Options);
       this.Size = size;
-      this.Color = color;
-      this.Props = props;
+      this.Position = position;
       this.CustomClass = customClass;
+      this.Props = props;
     }
 
     babelHelpers.createClass(Options, [{
       key: _Symbol.reflection,
       value: function value() {
         return {
-          type: "Elmish.Bulma.Elements.Tag.Types.Options",
+          type: "Elmish.Bulma.Elements.Icon.Types.Options",
           interfaces: ["FSharpRecord", "System.IEquatable"],
           properties: {
             Size: Option("string"),
-            Color: Option("string"),
+            Position: Option("string"),
+            CustomClass: Option("string"),
             Props: makeGeneric(List$1, {
               T: Interface("Fable.Helpers.React.Props.IHTMLProp")
-            }),
-            CustomClass: Option("string")
+            })
           }
         };
       }
@@ -8787,61 +8708,67 @@ var Types$4 = function (__exports) {
     }], [{
       key: "Empty",
       get: function get() {
-        return new Options(null, null, new List$1(), null);
+        return new Options(null, null, null, new List$1());
       }
     }]);
     return Options;
   }();
 
-  setType("Elmish.Bulma.Elements.Tag.Types.Options", Options);
+  setType("Elmish.Bulma.Elements.Icon.Types.Options", Options);
+
+  var ofPosition = __exports.ofPosition = function (_arg1) {
+    if (_arg1.tag === 1) {
+      return "is-right";
+    } else {
+      return "is-left";
+    }
+  };
+
   return __exports;
 }({});
-var isMedium$2 = new Types$4.Option(0, new Types$4.ITagSize(0));
-var isLarge$2 = new Types$4.Option(0, new Types$4.ITagSize(1));
-var isBlack$2 = new Types$4.Option(1, new ILevelAndColor(0));
-var isDark$2 = new Types$4.Option(1, new ILevelAndColor(1));
-var isLight$2 = new Types$4.Option(1, new ILevelAndColor(2));
-var isWhite$2 = new Types$4.Option(1, new ILevelAndColor(3));
-var isPrimary$2 = new Types$4.Option(1, new ILevelAndColor(4));
-var isInfo$2 = new Types$4.Option(1, new ILevelAndColor(5));
-var isSuccess$2 = new Types$4.Option(1, new ILevelAndColor(6));
-var isWarning$2 = new Types$4.Option(1, new ILevelAndColor(7));
-var isDanger$2 = new Types$4.Option(1, new ILevelAndColor(8));
+var isSmall$1 = new Types$3.Option(0, new ISize(0));
+var isMedium$1 = new Types$3.Option(0, new ISize(1));
+var isLarge$1 = new Types$3.Option(0, new ISize(2));
+var isLeft = new Types$3.Option(1, new Types$3.IPosition(0));
+var isRight = new Types$3.Option(1, new Types$3.IPosition(1));
 
 
-function tag(options, children) {
-  var parseOption = function parseOption(result, opt) {
-    if (opt.tag === 1) {
-      var Color = ofLevelAndColor(opt.data);
-      return new Types$4.Options(result.Size, Color, result.Props, result.CustomClass);
-    } else if (opt.tag === 2) {
-      return new Types$4.Options(result.Size, result.Color, opt.data, result.CustomClass);
-    } else if (opt.tag === 3) {
-      var CustomClass = opt.data;
-      return new Types$4.Options(result.Size, result.Color, result.Props, CustomClass);
+function icon(options, children) {
+  var parseOptions = function parseOptions(result, option) {
+    if (option.tag === 1) {
+      var Position = Types$3.ofPosition(option.data);
+      return new Types$3.Options(result.Size, Position, result.CustomClass, result.Props);
+    } else if (option.tag === 2) {
+      var CustomClass = option.data;
+      return new Types$3.Options(result.Size, result.Position, CustomClass, result.Props);
+    } else if (option.tag === 3) {
+      return new Types$3.Options(result.Size, result.Position, result.CustomClass, option.data);
     } else {
-      return new Types$4.Options(Types$4.ofTagSize(opt.data), result.Color, result.Props, result.CustomClass);
+      return new Types$3.Options(ofSize(option.data), result.Position, result.CustomClass, result.Props);
     }
   };
 
   var opts = function () {
-    var state = Types$4.Options.Empty;
+    var state = Types$3.Options.Empty;
     return function (list) {
-      return fold$1(parseOption, state, list);
+      return fold$1(parseOptions, state, list);
     };
   }()(options);
 
-  var className = new Props.HTMLAttr(22, join(" ", new List$1("tag", map(function (x) {
-    return x;
-  }, filter(function (x_1) {
-    return function () {
-      return x_1 != null;
-    }();
-  }, ofArray([opts.Size, opts.Color, opts.CustomClass]))))));
-  return react_1.apply(undefined, ["span", createObj(new List$1(className, opts.Props), 1)].concat(babelHelpers.toConsumableArray(children)));
+  return react_1.apply(undefined, ["span", createObj(toList(delay(function () {
+    return append$1(singleton$1(new Props.HTMLAttr(22, join(" ", new List$1("icon", map(function (x) {
+      return x;
+    }, filter(function (x_1) {
+      return function () {
+        return x_1 != null;
+      }();
+    }, ofArray([opts.Size, opts.Position, opts.CustomClass]))))))), delay(function () {
+      return opts.Props;
+    }));
+  })), 1)].concat(babelHelpers.toConsumableArray(children)));
 }
 
-var Types$5 = function (__exports) {
+var Types$4 = function (__exports) {
   var Option$$1 = __exports.Option = function () {
     function Option$$1(tag, data) {
       babelHelpers.classCallCheck(this, Option$$1);
@@ -8911,25 +8838,25 @@ var Types$5 = function (__exports) {
   setType("Elmish.Bulma.Elements.Content.Types.Options", Options);
   return __exports;
 }({});
-var isSmall$2 = new Types$5.Option(0, new ISize(0));
-var isMedium$3 = new Types$5.Option(0, new ISize(1));
-var isLarge$3 = new Types$5.Option(0, new ISize(2));
+var isSmall$2 = new Types$4.Option(0, new ISize(0));
+var isMedium$2 = new Types$4.Option(0, new ISize(1));
+var isLarge$2 = new Types$4.Option(0, new ISize(2));
 
 
 function content(options, children) {
   var parseOption = function parseOption(result, opt) {
     if (opt.tag === 1) {
       var CustomClass = opt.data;
-      return new Types$5.Options(result.Size, result.Props, CustomClass);
+      return new Types$4.Options(result.Size, result.Props, CustomClass);
     } else if (opt.tag === 2) {
-      return new Types$5.Options(result.Size, opt.data, result.CustomClass);
+      return new Types$4.Options(result.Size, opt.data, result.CustomClass);
     } else {
-      return new Types$5.Options(ofSize(opt.data), result.Props, result.CustomClass);
+      return new Types$4.Options(ofSize(opt.data), result.Props, result.CustomClass);
     }
   };
 
   var opts = function () {
-    var state = Types$5.Options.Empty;
+    var state = Types$4.Options.Empty;
     return function (list) {
       return fold$1(parseOption, state, list);
     };
@@ -9060,161 +8987,6 @@ var Footer = function (__exports) {
   return __exports;
 }({});
 
-var Types$6 = function (__exports) {
-  var IPosition = __exports.IPosition = function () {
-    function IPosition(tag, data) {
-      babelHelpers.classCallCheck(this, IPosition);
-      this.tag = tag;
-      this.data = data;
-    }
-
-    babelHelpers.createClass(IPosition, [{
-      key: _Symbol.reflection,
-      value: function value() {
-        return {
-          type: "Elmish.Bulma.Elements.Icon.Types.IPosition",
-          interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-          cases: [["Left"], ["Right"]]
-        };
-      }
-    }, {
-      key: "Equals",
-      value: function Equals(other) {
-        return this === other || this.tag === other.tag && equals(this.data, other.data);
-      }
-    }, {
-      key: "CompareTo",
-      value: function CompareTo(other) {
-        return compareUnions(this, other) | 0;
-      }
-    }]);
-    return IPosition;
-  }();
-
-  setType("Elmish.Bulma.Elements.Icon.Types.IPosition", IPosition);
-
-  var Option$$1 = __exports.Option = function () {
-    function Option$$1(tag, data) {
-      babelHelpers.classCallCheck(this, Option$$1);
-      this.tag = tag;
-      this.data = data;
-    }
-
-    babelHelpers.createClass(Option$$1, [{
-      key: _Symbol.reflection,
-      value: function value() {
-        return {
-          type: "Elmish.Bulma.Elements.Icon.Types.Option",
-          interfaces: ["FSharpUnion", "System.IEquatable"],
-          cases: [["Size", ISize], ["Position", IPosition], ["CustomClass", "string"], ["Props", makeGeneric(List$1, {
-            T: Interface("Fable.Helpers.React.Props.IHTMLProp")
-          })]]
-        };
-      }
-    }, {
-      key: "Equals",
-      value: function Equals(other) {
-        return this === other || this.tag === other.tag && equals(this.data, other.data);
-      }
-    }]);
-    return Option$$1;
-  }();
-
-  setType("Elmish.Bulma.Elements.Icon.Types.Option", Option$$1);
-
-  var Options = __exports.Options = function () {
-    function Options(size, position, customClass, props) {
-      babelHelpers.classCallCheck(this, Options);
-      this.Size = size;
-      this.Position = position;
-      this.CustomClass = customClass;
-      this.Props = props;
-    }
-
-    babelHelpers.createClass(Options, [{
-      key: _Symbol.reflection,
-      value: function value() {
-        return {
-          type: "Elmish.Bulma.Elements.Icon.Types.Options",
-          interfaces: ["FSharpRecord", "System.IEquatable"],
-          properties: {
-            Size: Option("string"),
-            Position: Option("string"),
-            CustomClass: Option("string"),
-            Props: makeGeneric(List$1, {
-              T: Interface("Fable.Helpers.React.Props.IHTMLProp")
-            })
-          }
-        };
-      }
-    }, {
-      key: "Equals",
-      value: function Equals(other) {
-        return equalsRecords(this, other);
-      }
-    }], [{
-      key: "Empty",
-      get: function get() {
-        return new Options(null, null, null, new List$1());
-      }
-    }]);
-    return Options;
-  }();
-
-  setType("Elmish.Bulma.Elements.Icon.Types.Options", Options);
-
-  var ofPosition = __exports.ofPosition = function (_arg1) {
-    if (_arg1.tag === 1) {
-      return "is-right";
-    } else {
-      return "is-left";
-    }
-  };
-
-  return __exports;
-}({});
-var isSmall$3 = new Types$6.Option(0, new ISize(0));
-var isMedium$4 = new Types$6.Option(0, new ISize(1));
-var isLarge$4 = new Types$6.Option(0, new ISize(2));
-var isLeft = new Types$6.Option(1, new Types$6.IPosition(0));
-var isRight = new Types$6.Option(1, new Types$6.IPosition(1));
-
-
-function icon(options, children) {
-  var parseOptions = function parseOptions(result, option) {
-    if (option.tag === 1) {
-      var Position = Types$6.ofPosition(option.data);
-      return new Types$6.Options(result.Size, Position, result.CustomClass, result.Props);
-    } else if (option.tag === 2) {
-      var CustomClass = option.data;
-      return new Types$6.Options(result.Size, result.Position, CustomClass, result.Props);
-    } else if (option.tag === 3) {
-      return new Types$6.Options(result.Size, result.Position, result.CustomClass, option.data);
-    } else {
-      return new Types$6.Options(ofSize(option.data), result.Position, result.CustomClass, result.Props);
-    }
-  };
-
-  var opts = function () {
-    var state = Types$6.Options.Empty;
-    return function (list) {
-      return fold$1(parseOptions, state, list);
-    };
-  }()(options);
-
-  return react_1.apply(undefined, ["span", createObj(toList(delay(function () {
-    return append$1(singleton$1(new Props.HTMLAttr(22, join(" ", new List$1("icon", map(function (x) {
-      return x;
-    }, filter(function (x_1) {
-      return function () {
-        return x_1 != null;
-      }();
-    }, ofArray([opts.Size, opts.Position, opts.CustomClass]))))))), delay(function () {
-      return opts.Props;
-    }));
-  })), 1)].concat(babelHelpers.toConsumableArray(children)));
-}
-
 function box_(options, children) {
   var opts = genericParse(options);
   return react_1.apply(undefined, ["div", createObj(toList(delay(function () {
@@ -9243,70 +9015,229 @@ function root$2(interactiveView, model, dispatch) {
   })));
 }
 
-var colorInteractive = columns(new List$1(), ofArray([column(new List$1(), ofArray([react_1("div", {
+var inlineBlockInteractive = columns(new List$1(), ofArray([column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
+  className: "block"
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(singleton$1(react_1("b", {}, "Block")), delay(function () {
+    return append$1(singleton$1(react_1.apply(undefined, ["div", {
+      className: "field"
+    }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+      return checkbox(new List$1(), ofArray(["One"]));
+    })))))), delay(function () {
+      return append$1(singleton$1(react_1.apply(undefined, ["div", {
+        className: "field"
+      }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+        return checkbox(new List$1(), ofArray(["Two"]));
+      })))))), delay(function () {
+        return append$1(singleton$1(react_1("b", {}, "Inline")), delay(function () {
+          return singleton$1(react_1.apply(undefined, ["div", {
+            className: "field"
+          }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+            return append$1(checkbox(new List$1(), ofArray(["One "])), delay(function () {
+              return checkbox(new List$1(), ofArray(["Two "]));
+            }));
+          }))))));
+        }));
+      }));
+    }));
+  }));
+})))))])), column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
+  className: "block"
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(singleton$1(react_1("b", {}, "Block")), delay(function () {
+    return append$1(singleton$1(react_1.apply(undefined, ["div", {
+      className: "field"
+    }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+      return radio(ofArray([name("block")]), ofArray(["One"]));
+    })))))), delay(function () {
+      return append$1(singleton$1(react_1.apply(undefined, ["div", {
+        className: "field"
+      }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+        return radio(ofArray([name("block")]), ofArray(["Two"]));
+      })))))), delay(function () {
+        return append$1(singleton$1(react_1("b", {}, "Inline")), delay(function () {
+          return singleton$1(react_1.apply(undefined, ["div", {
+            className: "field"
+          }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+            return append$1(radio(ofArray([name("inline")]), ofArray(["One"])), delay(function () {
+              return radio(ofArray([name("inline")]), ofArray(["Two "]));
+            }));
+          }))))));
+        }));
+      }));
+    }));
+  }));
+})))))]))]));
+var colorInteractive = columns(new List$1(), ofArray([column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
   className: "block callout is-primary"
-}, checkbox(ofArray([isChecked]), ofArray(["Checkbox"])), checkbox(ofArray([isChecked, isWhite]), ofArray(["White"])), checkbox(ofArray([isChecked, isLight]), ofArray(["Light"])), checkbox(ofArray([isChecked, isDark]), ofArray(["Dark"])), checkbox(ofArray([isChecked, isBlack]), ofArray(["Black"])))])), column(new List$1(), ofArray([react_1("div", {
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(checkbox(ofArray([isChecked]), ofArray(["Checkbox"])), delay(function () {
+    return append$1(checkbox(ofArray([isChecked, isWhite]), ofArray(["White"])), delay(function () {
+      return append$1(checkbox(ofArray([isChecked, isLight]), ofArray(["Light"])), delay(function () {
+        return append$1(checkbox(ofArray([isChecked, isDark]), ofArray(["Dark"])), delay(function () {
+          return checkbox(ofArray([isChecked, isBlack]), ofArray(["Black"]));
+        }));
+      }));
+    }));
+  }));
+})))))])), column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
   className: "block callout"
-}, checkbox(ofArray([isChecked, isPrimary]), ofArray(["Primary"])), checkbox(ofArray([isChecked, isInfo]), ofArray(["Info"])), checkbox(ofArray([isChecked, isSuccess]), ofArray(["Success"])), checkbox(ofArray([isChecked, isWarning]), ofArray(["Warning"])), checkbox(ofArray([isChecked, isDanger]), ofArray(["Danger"])))]))]));
-var sizeInteractive = react_1("div", {
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(checkbox(ofArray([isChecked, isPrimary]), ofArray(["Primary"])), delay(function () {
+    return append$1(checkbox(ofArray([isChecked, isInfo]), ofArray(["Info"])), delay(function () {
+      return append$1(checkbox(ofArray([isChecked, isSuccess]), ofArray(["Success"])), delay(function () {
+        return append$1(checkbox(ofArray([isChecked, isWarning]), ofArray(["Warning"])), delay(function () {
+          return checkbox(ofArray([isChecked, isDanger]), ofArray(["Danger"]));
+        }));
+      }));
+    }));
+  }));
+})))))])), column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
+  className: "block callout is-primary"
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(radio(ofArray([isChecked, name("rad")]), ofArray(["Checkbox"])), delay(function () {
+    return append$1(radio(ofArray([isChecked, isWhite, name("rad")]), ofArray(["White"])), delay(function () {
+      return append$1(radio(ofArray([isChecked, isLight, name("rad")]), ofArray(["Light"])), delay(function () {
+        return append$1(radio(ofArray([isChecked, isDark, name("rad")]), ofArray(["Dark"])), delay(function () {
+          return radio(ofArray([isChecked, isBlack, name("rad")]), ofArray(["Black"]));
+        }));
+      }));
+    }));
+  }));
+})))))])), column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
+  className: "block callout"
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(radio(ofArray([isChecked, isPrimary, name("rad1")]), ofArray(["Primary"])), delay(function () {
+    return append$1(radio(ofArray([isChecked, isInfo, name("rad1")]), ofArray(["Info"])), delay(function () {
+      return append$1(radio(ofArray([isChecked, isSuccess, name("rad1")]), ofArray(["Success"])), delay(function () {
+        return append$1(radio(ofArray([isChecked, isWarning, name("rad1")]), ofArray(["Warning"])), delay(function () {
+          return radio(ofArray([isChecked, isDanger, name("rad1")]), ofArray(["Danger"]));
+        }));
+      }));
+    }));
+  }));
+})))))]))]));
+var sizeInteractive = columns(new List$1(), ofArray([column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
   className: "block"
-}, checkbox(ofArray([isChecked, isSmall]), ofArray(["Small"])), checkbox(ofArray([isChecked]), ofArray(["Normal"])), checkbox(ofArray([isChecked, isMedium]), ofArray(["Medium"])), checkbox(ofArray([isChecked, isLarge]), ofArray(["Large"])));
-var stylesInteractive = react_1("div", {
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(checkbox(ofArray([isChecked, isSmall]), ofArray(["Small"])), delay(function () {
+    return append$1(checkbox(ofArray([isChecked]), ofArray(["Normal"])), delay(function () {
+      return append$1(checkbox(ofArray([isChecked, isMedium]), ofArray(["Medium"])), delay(function () {
+        return checkbox(ofArray([isChecked, isLarge]), ofArray(["Large"]));
+      }));
+    }));
+  }));
+})))))])), column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
   className: "block"
-}, checkbox(ofArray([isChecked, isCircle, isDisabled]), ofArray(["Checkbox"])), checkbox(ofArray([isChecked, isCircle, isPrimary]), ofArray(["Checkbox"])), checkbox(ofArray([isChecked, isCircle, isSuccess]), ofArray(["Checkbox - success"])), checkbox(ofArray([isChecked, isCircle, isWarning]), ofArray(["Checkbox - warning"])), checkbox(ofArray([isChecked, isCircle, isDanger]), ofArray(["Checkbox - danger"])), checkbox(ofArray([isChecked, isCircle, isInfo]), ofArray(["Checkbox - info"])));
-var stateInteractive = react_1("div", {
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(radio(ofArray([name("rSize"), isSmall]), ofArray(["Small"])), delay(function () {
+    return append$1(radio(ofArray([name("rSize")]), ofArray(["Normal"])), delay(function () {
+      return append$1(radio(ofArray([name("rSize"), isMedium]), ofArray(["Medium"])), delay(function () {
+        return radio(ofArray([name("rSize"), isLarge]), ofArray(["Large"]));
+      }));
+    }));
+  }));
+})))))]))]));
+var stylesInteractive = react_1.apply(undefined, ["div", {
   className: "block"
-}, checkbox(ofArray([isDisabled]), ofArray(["Disabled"])), checkbox(ofArray([isDisabled, isChecked]), ofArray(["Disabled & Checked"])), checkbox(new List$1(), ofArray(["Unchecked"])), checkbox(ofArray([isChecked]), ofArray(["checked"])));
-function extraInteractive(model, dispatch) {
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(checkbox(ofArray([isChecked, isCircle, isDisabled]), ofArray(["Checkbox"])), delay(function () {
+    return append$1(checkbox(ofArray([isChecked, isCircle, isPrimary]), ofArray(["Checkbox"])), delay(function () {
+      return append$1(checkbox(ofArray([isChecked, isCircle, isSuccess]), ofArray(["Checkbox - success"])), delay(function () {
+        return append$1(checkbox(ofArray([isChecked, isCircle, isWarning]), ofArray(["Checkbox - warning"])), delay(function () {
+          return append$1(checkbox(ofArray([isChecked, isCircle, isDanger]), ofArray(["Checkbox - danger"])), delay(function () {
+            return checkbox(ofArray([isChecked, isCircle, isInfo]), ofArray(["Checkbox - info"]));
+          }));
+        }));
+      }));
+    }));
+  }));
+})))));
+var stateInteractive = columns(new List$1(), ofArray([column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
+  className: "block"
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(checkbox(ofArray([isDisabled]), ofArray(["Disabled"])), delay(function () {
+    return append$1(checkbox(ofArray([isDisabled, isChecked]), ofArray(["Disabled & Checked"])), delay(function () {
+      return append$1(checkbox(new List$1(), ofArray(["Unchecked"])), delay(function () {
+        return checkbox(ofArray([isChecked]), ofArray(["checked"]));
+      }));
+    }));
+  }));
+})))))])), column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
+  className: "block"
+}].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+  return append$1(radio(ofArray([isDisabled]), ofArray(["Disabled"])), delay(function () {
+    return append$1(radio(ofArray([isDisabled, isChecked]), ofArray(["Disabled & Checked"])), delay(function () {
+      return append$1(radio(new List$1(), ofArray(["Unchecked"])), delay(function () {
+        return radio(ofArray([isChecked]), ofArray(["checked"]));
+      }));
+    }));
+  }));
+})))))]))]));
+function eventInteractive(model, dispatch) {
   var state = !model.IsChecked;
-  return react_1("div", {
+  return react_1.apply(undefined, ["div", {
     className: "block"
-  }, checkbox(toList(delay(function () {
-    return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
-      return singleton$1(onChange(function (x) {
-        dispatch(new Msg(3, state));
+  }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
+    return append$1(checkbox(toList(delay(function () {
+      return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
+        return singleton$1(onChange(function (x) {
+          dispatch(new Msg(6, state));
+        }));
+      }));
+    })), ofArray([{
+      formatFn: fsFormat("%A"),
+      input: "%A"
+    }.formatFn(function (x) {
+      return x;
+    })(model.IsChecked)])), delay(function () {
+      return append$1(checkbox(toList(delay(function () {
+        return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
+          return singleton$1(onChange(function (x_1) {
+            dispatch(new Msg(6, state));
+          }));
+        }));
+      })), ofArray([model.IsChecked ? ":p" : ":'("])), delay(function () {
+        return checkbox(toList(delay(function () {
+          return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
+            return singleton$1(onChange(function (x_2) {
+              dispatch(new Msg(6, state));
+            }));
+          }));
+        })), ofArray([model.IsChecked ? icon(new List$1(), ofArray([react_1("i", {
+          className: "fa fa-plane"
+        })])) : icon(new List$1(), ofArray([react_1("i", {
+          className: "fa fa-rocket"
+        })]))]));
       }));
     }));
-  })), ofArray([{
-    formatFn: fsFormat("%A"),
-    input: "%A"
-  }.formatFn(function (x) {
-    return x;
-  })(model.IsChecked)])), checkbox(toList(delay(function () {
-    return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
-      return singleton$1(onChange(function (x_1) {
-        dispatch(new Msg(3, state));
-      }));
-    }));
-  })), ofArray([model.IsChecked ? ":p" : ":'("])), checkbox(toList(delay(function () {
-    return append$1(model.IsChecked ? singleton$1(isChecked) : empty(), delay(function () {
-      return singleton$1(onChange(function (x_2) {
-        dispatch(new Msg(3, state));
-      }));
-    }));
-  })), ofArray([model.IsChecked ? button(new List$1(), ofArray(["a button"])) : tag(new List$1(), ofArray(["a tag"]))])));
+  })))));
 }
 function root$1(model, dispatch) {
-  return docPage(ofArray([contentFromMarkdown(model.Intro), docSection("### Colors", root$2(colorInteractive, model.ColorViewer, function ($var1) {
+  return docPage(ofArray([contentFromMarkdown(model.Intro), docSection("### Inline vs Block", root$2(inlineBlockInteractive, model.InlineBlockViewer, function ($var1) {
     return dispatch(function (arg0) {
       return new Msg(0, arg0);
     }($var1));
-  })), docSection("### Sizes", root$2(sizeInteractive, model.SizeViewer, function ($var2) {
+  })), docSection("### Colors", root$2(colorInteractive, model.ColorViewer, function ($var2) {
     return dispatch(function (arg0_1) {
       return new Msg(1, arg0_1);
     }($var2));
-  })), docSection("\r\n### Styles\r\nThe checkbox can be **circle**.\r\n                            ", root$2(stylesInteractive, model.CircleViewer, function ($var3) {
+  })), docSection("### Sizes", root$2(sizeInteractive, model.SizeViewer, function ($var3) {
     return dispatch(function (arg0_2) {
       return new Msg(2, arg0_2);
     }($var3));
-  })), docSection("### States", root$2(stateInteractive, model.StateViewer, function ($var4) {
+  })), docSection("\r\n### Styles\r\nThe checkbox can be **circle**.\r\n                            ", root$2(stylesInteractive, model.CircleViewer, function ($var4) {
     return dispatch(function (arg0_3) {
-      return new Msg(2, arg0_3);
+      return new Msg(3, arg0_3);
     }($var4));
-  })), docSection("### Event handler", root$2(extraInteractive(model, dispatch), model.CircleViewer, function ($var5) {
+  })), docSection("### States", root$2(stateInteractive, model.StateViewer, function ($var5) {
     return dispatch(function (arg0_4) {
-      return new Msg(2, arg0_4);
+      return new Msg(4, arg0_4);
     }($var5));
+  })), docSection("### Event handler", root$2(eventInteractive(model, dispatch), model.EventViewer, function ($var6) {
+    return dispatch(function (arg0_5) {
+      return new Msg(5, arg0_5);
+    }($var6));
   }))]));
 }
 
@@ -9355,7 +9286,7 @@ var Msg$2 = function () {
       return {
         type: "App.Types.Msg",
         interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-        cases: [["CheckboxMsg", Msg]]
+        cases: [["CheckradioMsg", Msg]]
       };
     }
   }, {
@@ -9373,9 +9304,9 @@ var Msg$2 = function () {
 }();
 setType("App.Types.Msg", Msg$2);
 var ElementsModel = function () {
-  function ElementsModel(checkbox) {
+  function ElementsModel(checkradio) {
     babelHelpers.classCallCheck(this, ElementsModel);
-    this.Checkbox = checkbox;
+    this.Checkradio = checkradio;
   }
 
   babelHelpers.createClass(ElementsModel, [{
@@ -9385,7 +9316,7 @@ var ElementsModel = function () {
         type: "App.Types.ElementsModel",
         interfaces: ["FSharpRecord", "System.IEquatable", "System.IComparable"],
         properties: {
-          Checkbox: Model
+          Checkradio: Model
         }
       };
     }
@@ -24624,38 +24555,56 @@ function update$2(msg, model) {
   }
 }
 
+var inlineBlockCode = "\r\n```fsharp\r\n    // Block\r\n    yield div [ ClassName \"field\"] [\r\n        yield! Checkradio.checkbox [ ] [ str \"One\" ]\r\n        \r\n    ]\r\n    yield div [ ClassName \"field\"] [\r\n        yield! Checkradio.checkbox [ ] [ str \"Two\" ]\r\n    ]\r\n                       \r\n    // Inline\r\n    yield div [ ClassName \"field\"] [\r\n        yield! Checkradio.checkbox [ ] [ str \"One \" ]\r\n        yield! Checkradio.checkbox [ ] [ str \"Two \" ]\r\n    ]\r\n```\r\n    ";
 var colorCode = "\r\n```fsharp\r\n    Checkbox.checkbox [ ] [ str \"Button\" ]\r\n    Checkbox.checkbox [ Checkbox.isWhite ] [ str \"White\" ]\r\n    Checkbox.checkbox [ Checkbox.isLight ] [ str \"Light\" ]\r\n    Checkbox.checkbox [ Checkbox.isDark ] [ str \"Dark\" ]\r\n    Checkbox.checkbox [ Checkbox.isBlack ] [ str \"Black\" ]\r\n    Checkbox.checkbox [ Checkbox.isPrimary ] [ str \"Primary\" ]\r\n    Checkbox.checkbox [ Checkbox.isInfo ] [ str \"Info\" ]\r\n    Checkbox.checkbox [ Checkbox.isSuccess ] [ str \"Success\" ]\r\n    Checkbox.checkbox [ Checkbox.isWarning ] [ str \"Warning\" ]\r\n    Checkbox.checkbox [ Checkbox.isDanger ] [ str \"Danger\" ]\r\n```\r\n    ";
 var sizeCode = "\r\n```fsharp\r\n    Checkbox.checkbox [ Checkbox.isSmall ] [ str \"Small\" ]\r\n    Checkbox.checkbox [ ] [ str \"Normal\" ]\r\n    Checkbox.checkbox [ Checkbox.isMedium ] [ str \"Medium\" ]\r\n    Checkbox.checkbox [ Checkbox.isLarge ] [ str \"Large\" ]\r\n```\r\n    ";
 var circleCode = "\r\n```fsharp\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle ] [ str \"Checkbox\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isPrimary ] [ str \"Checkbox\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isSuccess ] [ str \"Checkbox - success\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isWarning ] [ str \"Checkbox - warning\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isDanger ] [ str \"Checkbox - danger\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isInfo ] [ str \"Checkbox - info\" ]\r\n```\r\n    ";
 
-var stateCode = "\r\n```fsharp\r\n    Checkbox.checkbox [ Checkbox.isDisabled ] [ str \"Disabled\" ]\r\n    Checkbox.checkbox [ ] [ str \"Unchecked\" ]\r\n    Checkbox.checkbox [ Checkbox.isChecked;] [ str \"checked\" ]\r\n```\r\n    ";
-
+var stateCode = "\r\n```fsharp\r\n    Checkradio.checkbox [  Checkradio.isDisabled ] [ str \"Disabled\" ]\r\n    Checkradio.checkbox [  Checkradio.isDisabled; Checkradio.isChecked ] [ str \"Disabled & Checked\" ]\r\n    Checkradio.checkbox [ ] [ str \"Unchecked\" ]\r\n    Checkradio.checkbox [ Checkradio.isChecked;] [ str \"checked\" ]\r\n```\r\n    ";
+var eventCode = "\r\n```fsharp\r\n    // For registering a change event, we can use the Checkradio.onChange helper\r\n    yield! Checkradio.checkbox \r\n            [ \r\n                if model.IsChecked then yield Checkradio.isChecked;  \r\n                yield Checkradio.onChange (fun x -> dispatch (Change state))\r\n            ] \r\n            [ str  (sprintf \"%A\" model.IsChecked) ]\r\n\r\n```\r\n    ";
 var intro = "\r\n# Checkbox\r\n\r\nThe **Checkbox** can have different colors, sizes and states.\r\n\r\n*[bulma-checkradio documentation](https://github.com/Wikiki/bulma-checkradio)*\r\n        ";
 function init$1() {
+  var InlineBlockViewer = init$2(inlineBlockCode);
   var ColorViewer = init$2(colorCode);
   var SizeViewer = init$2(sizeCode);
   var CircleViewer = init$2(circleCode);
   var StateViewer = init$2(stateCode);
-  return new Model(intro, ColorViewer, SizeViewer, CircleViewer, StateViewer, false);
+  var EventViewer = init$2(eventCode);
+  return new Model(intro, InlineBlockViewer, ColorViewer, SizeViewer, CircleViewer, StateViewer, EventViewer, false);
 }
 function update$1(msg, model) {
   if (msg.tag === 1) {
-    var patternInput = update$2(msg.data, model.SizeViewer);
-    return [new Model(model.Intro, model.ColorViewer, patternInput[0], model.CircleViewer, model.StateViewer, model.IsChecked), Cmd.map(function (arg0) {
+    var patternInput = update$2(msg.data, model.ColorViewer);
+    return [new Model(model.Intro, model.InlineBlockViewer, patternInput[0], model.SizeViewer, model.CircleViewer, model.StateViewer, model.EventViewer, model.IsChecked), Cmd.map(function (arg0) {
       return new Msg(1, arg0);
     }, patternInput[1])];
   } else if (msg.tag === 2) {
-    var patternInput_1 = update$2(msg.data, model.CircleViewer);
-    return [new Model(model.Intro, model.ColorViewer, model.SizeViewer, patternInput_1[0], model.StateViewer, model.IsChecked), Cmd.map(function (arg0_1) {
+    var patternInput_1 = update$2(msg.data, model.SizeViewer);
+    return [new Model(model.Intro, model.InlineBlockViewer, model.ColorViewer, patternInput_1[0], model.CircleViewer, model.StateViewer, model.EventViewer, model.IsChecked), Cmd.map(function (arg0_1) {
       return new Msg(2, arg0_1);
     }, patternInput_1[1])];
   } else if (msg.tag === 3) {
-    return [new Model(model.Intro, model.ColorViewer, model.SizeViewer, model.CircleViewer, model.StateViewer, msg.data), Cmd.none()];
-  } else {
-    var patternInput_2 = update$2(msg.data, model.ColorViewer);
-    return [new Model(model.Intro, patternInput_2[0], model.SizeViewer, model.CircleViewer, model.StateViewer, model.IsChecked), Cmd.map(function (arg0_2) {
-      return new Msg(0, arg0_2);
+    var patternInput_2 = update$2(msg.data, model.CircleViewer);
+    return [new Model(model.Intro, model.InlineBlockViewer, model.ColorViewer, model.SizeViewer, patternInput_2[0], model.StateViewer, model.EventViewer, model.IsChecked), Cmd.map(function (arg0_2) {
+      return new Msg(3, arg0_2);
     }, patternInput_2[1])];
+  } else if (msg.tag === 4) {
+    var patternInput_3 = update$2(msg.data, model.StateViewer);
+    return [new Model(model.Intro, model.InlineBlockViewer, model.ColorViewer, model.SizeViewer, model.CircleViewer, patternInput_3[0], model.EventViewer, model.IsChecked), Cmd.map(function (arg0_3) {
+      return new Msg(4, arg0_3);
+    }, patternInput_3[1])];
+  } else if (msg.tag === 5) {
+    var patternInput_4 = update$2(msg.data, model.EventViewer);
+    return [new Model(model.Intro, model.InlineBlockViewer, model.ColorViewer, model.SizeViewer, model.CircleViewer, model.StateViewer, patternInput_4[0], model.IsChecked), Cmd.map(function (arg0_4) {
+      return new Msg(5, arg0_4);
+    }, patternInput_4[1])];
+  } else if (msg.tag === 6) {
+    return [new Model(model.Intro, model.InlineBlockViewer, model.ColorViewer, model.SizeViewer, model.CircleViewer, model.StateViewer, model.EventViewer, msg.data), Cmd.none()];
+  } else {
+    var patternInput_5 = update$2(msg.data, model.InlineBlockViewer);
+    return [new Model(model.Intro, patternInput_5[0], model.ColorViewer, model.SizeViewer, model.CircleViewer, model.StateViewer, model.EventViewer, model.IsChecked), Cmd.map(function (arg0_5) {
+      return new Msg(0, arg0_5);
+    }, patternInput_5[1])];
   }
 }
 
@@ -24666,21 +24615,15 @@ function init$3() {
 var pageParser = function () {
   var parsers = ofArray([map_1(new Page(0), s("home")), map_1(new Page(1, new Elements(0)), function () {
     var parseBefore = s("elements");
-    var parseAfter = s("checkbox");
+    var parseAfter = s("checkradio");
     return function (state) {
       return collect(parseAfter, parseBefore(state));
     };
-  }()), map_1(new Page(1, new Elements(1)), function () {
-    var parseBefore_1 = s("elements");
-    var parseAfter_1 = s("radio");
-    return function (state_1) {
-      return collect(parseAfter_1, parseBefore_1(state_1));
-    };
-  }()), map_1(new Page(0), function (state_2) {
-    return top(state_2);
+  }()), map_1(new Page(0), function (state_1) {
+    return top(state_1);
   })]);
-  return function (state_3) {
-    return oneOf(parsers, state_3);
+  return function (state_2) {
+    return oneOf(parsers, state_2);
   };
 }();
 function urlUpdate(result, model) {
@@ -24697,7 +24640,7 @@ function init(result) {
   return [patternInput[0], Cmd.batch(ofArray([patternInput[1]]))];
 }
 function update(msg, model) {
-  var patternInput = update$1(msg.data, model.Elements.Checkbox);
+  var patternInput = update$1(msg.data, model.Elements.Checkradio);
   return [function () {
     var Elements$$1 = new ElementsModel(patternInput[0]);
     return new Model$2(model.CurrentPage, model.Home, Elements$$1);
@@ -28965,7 +28908,7 @@ function menuItem(label$$1, page, currentPage) {
   return react_1("li", {}, react_1("a", createObj(ofArray([classList(ofArray([["is-active", page.Equals(currentPage)]])), new Props.HTMLAttr(51, toHash(page))]), 1), label$$1));
 }
 function menu(currentPage) {
-  return menu$1(new List$1(), ofArray([list(new List$1(), ofArray([menuItem("Home", new Page(0), currentPage)])), label(new List$1(), ofArray(["Elements"])), list(new List$1(), ofArray([menuItem("Checkbox", new Page(1, new Elements(0)), currentPage), menuItem("Radio", new Page(1, new Elements(1)), currentPage)]))]));
+  return menu$1(new List$1(), ofArray([list(new List$1(), ofArray([menuItem("Home", new Page(0), currentPage)])), label(new List$1(), ofArray(["Elements"])), list(new List$1(), ofArray([menuItem("Checkradio", new Page(1, new Elements(0)), currentPage)]))]));
 }
 var header = react_1("div", {
   className: "hero is-primary"
@@ -28979,19 +28922,11 @@ var header = react_1("div", {
 function root(model, dispatch) {
   var pageHtml = function pageHtml(_arg1) {
     if (_arg1.tag === 1) {
-      if (_arg1.data.tag === 1) {
-        return root$1(model.Elements.Checkbox, function ($var1) {
-          return dispatch(function (arg0) {
-            return new Msg$2(0, arg0);
-          }($var1));
-        });
-      } else {
-        return root$1(model.Elements.Checkbox, function ($var2) {
-          return dispatch(function (arg0_1) {
-            return new Msg$2(0, arg0_1);
-          }($var2));
-        });
-      }
+      return root$1(model.Elements.Checkradio, function ($var1) {
+        return dispatch(function (arg0) {
+          return new Msg$2(0, arg0);
+        }($var1));
+      });
     } else {
       return root$3(model.Home);
     }

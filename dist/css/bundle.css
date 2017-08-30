@@ -5241,7 +5241,7 @@ label.panel-block {
   .is-radio[type="radio"] + label,
   .is-checkbox[type="checkbox"] + label {
     position: relative;
-    display: block;
+    display: inline-block;
     cursor: pointer;
     vertical-align: middle; }
     .is-radio[type="radio"] + label:hover::before,
