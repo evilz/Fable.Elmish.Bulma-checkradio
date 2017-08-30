@@ -11,6 +11,7 @@ open Types
 let pageParser : Parser<Page -> Page, Page> =
     oneOf [ map Home (s "home")
             map (Element Checkradio) (s "elements" </> s "checkradio")
+            map (Element Switch) (s "elements" </> s "switch")
             map Home top ]
 
 let urlUpdate (result : Option<Page>) model =
@@ -24,6 +25,7 @@ let urlUpdate (result : Option<Page>) model =
 let init result =
     let elements =
         { Checkradio = Elements.Checkradio.State.init ()
+          Switch = Elements.Switch.State.init ()
         }
 
 
@@ -44,5 +46,9 @@ let update msg model =
         let (checkradio, checkboxMsg) = Elements.Checkradio.State.update msg model.Elements.Checkradio
         { model with Elements =
                         { model.Elements with Checkradio = checkradio } }, Cmd.map CheckradioMsg checkboxMsg
+    | SwitchMsg msg ->
+        let (switch, switchMsg) = Elements.Switch.State.update msg model.Elements.Switch
+        { model with Elements =
+                        { model.Elements with Switch = switch } }, Cmd.map SwitchMsg switchMsg
 
     

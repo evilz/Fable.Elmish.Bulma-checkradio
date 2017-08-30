@@ -1,4 +1,4 @@
-module Elements.Checkradio.State
+module Elements.Switch.State
 
 open Elmish
 open Types
@@ -97,11 +97,11 @@ let eventCode =
 
 let intro =
         """
-# Checkbox
+# Switch
 
-The **Checkbox** can have different colors, sizes and states.
+The **Switch** can have different colors, sizes and states.
 
-*[bulma-checkradio documentation](https://github.com/Wikiki/bulma-checkradio)*
+*[bulma-extensions switch documentation](https://wikiki.github.io/bulma-extensions/switch)*
         """
 
 

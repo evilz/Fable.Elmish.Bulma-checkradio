@@ -125,29 +125,29 @@ module Switch =
 
         let opts = options |> List.fold parseOptions Options.Empty
 
-        div [ ClassName "field" ]
-            [ input 
-                [ yield classBaseList
-                    (Helpers.generateClassName Styles.Switch [ opts.Level; opts.Size; ])
-                     [ Styles.IsOutlined, opts.IsOutlined
-                       Styles.IsRounded, opts.IsRounded
-                       opts.CustomClass.Value, opts.CustomClass.IsSome ] :> IHTMLProp
-                  if opts.OnChange.IsSome then
-                    yield Checked opts.IsChecked :> IHTMLProp
-                    yield DOMAttr.OnChange opts.OnChange.Value :> IHTMLProp
-                  else
-                    yield DefaultChecked opts.IsChecked :> IHTMLProp
-                  yield! opts.Props 
-                  yield Type "checkbox" :> IHTMLProp
-                  yield Id opts.ComponentId :> IHTMLProp
-                  yield Disabled opts.IsDisabled :> IHTMLProp
+        //div [ ClassName "field" ]
+        [ input 
+            [ yield classBaseList
+                (Helpers.generateClassName Styles.Switch [ opts.Level; opts.Size; ])
+                 [ Styles.IsOutlined, opts.IsOutlined
+                   Styles.IsRounded, opts.IsRounded
+                   opts.CustomClass.Value, opts.CustomClass.IsSome ] :> IHTMLProp
+              if opts.OnChange.IsSome then
+                yield Checked opts.IsChecked :> IHTMLProp
+                yield DOMAttr.OnChange opts.OnChange.Value :> IHTMLProp
+              else
+                yield DefaultChecked opts.IsChecked :> IHTMLProp
+              yield! opts.Props 
+              yield Type "checkbox" :> IHTMLProp
+              yield Id opts.ComponentId :> IHTMLProp
+              yield Disabled opts.IsDisabled :> IHTMLProp
+
+            ]
+
+          label [ HtmlFor opts.ComponentId ] 
+                [ match children with
+                      | [] -> yield str opts.Label
+                      | _ -> yield! children
 
                 ]
-
-              label [ HtmlFor opts.ComponentId ] 
-                    [ match children with
-                          | [] -> yield str opts.Label
-                          | _ -> yield! children
-
-                    ]
-            ]
+        ]

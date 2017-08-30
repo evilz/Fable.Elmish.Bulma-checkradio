@@ -17,6 +17,10 @@
         <Compile Include="src/Elements/Checkradio/Types.fs" />
         <Compile Include="src/Elements/Checkradio/State.fs" />
         <Compile Include="src/Elements/Checkradio/View.fs" />
+
+        <Compile Include="src/Elements/Switch/Types.fs" />
+        <Compile Include="src/Elements/Switch/State.fs" />
+        <Compile Include="src/Elements/Switch/View.fs" />
     <!-- End Elements -->
     <!-- Home -->
     <Compile Include="src/Home/Types.fs" />

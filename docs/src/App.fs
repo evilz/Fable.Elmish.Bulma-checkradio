@@ -46,6 +46,7 @@ let menu currentPage =
           Menu.list [ ]
             [ //menuItem "Home" Home currentPage
               menuItem "Checkradio" (Element Checkradio) currentPage
+              menuItem "Switch" (Element Switch) currentPage
             ]
         ]
           
@@ -63,6 +64,7 @@ let root model dispatch =
         | Element element ->
             match element with
             | Elements.Checkradio -> Elements.Checkradio.View.root model.Elements.Checkradio (CheckradioMsg >> dispatch)
+            | Elements.Switch -> Elements.Switch.View.root model.Elements.Switch (SwitchMsg >> dispatch)
             
 
     div []
