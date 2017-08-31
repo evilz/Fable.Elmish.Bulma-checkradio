@@ -6,6 +6,7 @@ type Elements =
     | Checkradio
     | Switch
     | Slider
+    | Divider
 
 
 type Page =
@@ -20,3 +21,4 @@ let toHash page =
         | Checkradio -> "#elements/checkradio"
         | Switch -> "#elements/switch"
         | Slider -> "#elements/slider"
+        | Divider -> "#elements/divider"

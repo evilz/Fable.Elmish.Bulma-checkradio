@@ -13,6 +13,7 @@ let pageParser : Parser<Page -> Page, Page> =
             map (Element Checkradio) (s "elements" </> s "checkradio")
             map (Element Switch) (s "elements" </> s "switch")
             map (Element Slider) (s "elements" </> s "slider")
+            map (Element Divider) (s "elements" </> s "divider")
             map Home top ]
 
 let urlUpdate (result : Option<Page>) model =
@@ -28,6 +29,7 @@ let init result =
         { Checkradio = Elements.Checkradio.State.init ()
           Switch = Elements.Switch.State.init ()
           Slider = Elements.Slider.State.init ()
+          Divider = Elements.Divider.State.init ()
         }
 
 
@@ -56,4 +58,8 @@ let update msg model =
             let (slider, sliderMsg) = Elements.Slider.State.update msg model.Elements.Slider
             { model with Elements =
                             { model.Elements with Slider = slider } }, Cmd.map SliderMsg sliderMsg
+    | DividerMsg msg ->
+            let (divider, dividerMsg) = Elements.Divider.State.update msg model.Elements.Divider
+            { model with Elements =
+                            { model.Elements with Divider = divider } }, Cmd.map DividerMsg dividerMsg
     

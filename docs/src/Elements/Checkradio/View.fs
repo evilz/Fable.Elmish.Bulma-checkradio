@@ -56,7 +56,7 @@ let colorInteractive =
     Columns.columns [ ]
         [ 
             Column.column [ ]
-                [ div [ ClassName "block callout is-primary" ]
+                [ div [ ClassName "block callout is-dark" ]
                       [ yield! Checkradio.checkbox [ Checkradio.isChecked ] [ str "Checkbox" ]
                         yield! Checkradio.checkbox [ Checkradio.isChecked; Checkradio.isWhite ] [ str "White" ]
                         yield! Checkradio.checkbox [ Checkradio.isChecked; Checkradio.isLight ] [ str "Light" ]
@@ -76,7 +76,7 @@ let colorInteractive =
                 ]
 
             Column.column [ ]
-                [ div [ ClassName "block callout is-primary" ]
+                [ div [ ClassName "block callout is-dark" ]
                       [ yield! Checkradio.radio [ Checkradio.isChecked; Checkradio.name "rad" ] [ str "Checkbox" ]
                         yield! Checkradio.radio [ Checkradio.isChecked; Checkradio.isWhite; Checkradio.name "rad" ] [ str "White" ]
                         yield! Checkradio.radio [ Checkradio.isChecked; Checkradio.isLight; Checkradio.name "rad" ] [ str "Light" ]

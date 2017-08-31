@@ -25,6 +25,10 @@
         <Compile Include="src/Elements/Slider/Types.fs" />
         <Compile Include="src/Elements/Slider/State.fs" />
         <Compile Include="src/Elements/Slider/View.fs" />
+
+        <Compile Include="src/Elements/Divider/Types.fs" />
+        <Compile Include="src/Elements/Divider/State.fs" />
+        <Compile Include="src/Elements/Divider/View.fs" />
     <!-- End Elements -->
     <!-- Home -->
     <Compile Include="src/Home/Types.fs" />

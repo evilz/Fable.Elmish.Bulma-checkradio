@@ -48,6 +48,7 @@ let menu currentPage =
               menuItem "Checkradio" (Element Checkradio) currentPage
               menuItem "Switch" (Element Switch) currentPage
               menuItem "Slider" (Element Slider) currentPage
+              menuItem "Divider" (Element Divider) currentPage
             ]
         ]
           
@@ -67,6 +68,7 @@ let root model dispatch =
             | Elements.Checkradio -> Elements.Checkradio.View.root model.Elements.Checkradio (CheckradioMsg >> dispatch)
             | Elements.Switch -> Elements.Switch.View.root model.Elements.Switch (SwitchMsg >> dispatch)
             | Elements.Slider -> Elements.Slider.View.root model.Elements.Slider (SliderMsg >> dispatch)
+            | Elements.Divider -> Elements.Divider.View.root model.Elements.Divider (DividerMsg >> dispatch)
             
 
     div []
