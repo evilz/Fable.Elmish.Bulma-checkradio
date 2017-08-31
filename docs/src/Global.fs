@@ -5,6 +5,7 @@ open Fable.Core
 type Elements =
     | Checkradio
     | Switch
+    | Slider
 
 
 type Page =
@@ -18,3 +19,4 @@ let toHash page =
         match element with
         | Checkradio -> "#elements/checkradio"
         | Switch -> "#elements/switch"
+        | Slider -> "#elements/slider"

@@ -8,43 +8,43 @@ let inlineBlockCode =
 ```fsharp
     // Block
     yield div [ ClassName "field"] [
-        yield! Checkradio.checkbox [ ] [ str "One" ]
+        yield! Switch.switch [ ] [ str "One" ]
         
     ]
     yield div [ ClassName "field"] [
-        yield! Checkradio.checkbox [ ] [ str "Two" ]
+        yield! Switch.switch [ ] [ str "Two" ]
     ]
                        
     // Inline
     yield div [ ClassName "field"] [
-        yield! Checkradio.checkbox [ ] [ str "One " ]
-        yield! Checkradio.checkbox [ ] [ str "Two " ]
+        yield! Switch.switch [ ] [ str "One " ]
+        yield! Switch.switch [ ] [ str "Two " ]
     ]
 ```
     """ 
 let colorCode =
     """
 ```fsharp
-    Checkbox.checkbox [ ] [ str "Button" ]
-    Checkbox.checkbox [ Checkbox.isWhite ] [ str "White" ]
-    Checkbox.checkbox [ Checkbox.isLight ] [ str "Light" ]
-    Checkbox.checkbox [ Checkbox.isDark ] [ str "Dark" ]
-    Checkbox.checkbox [ Checkbox.isBlack ] [ str "Black" ]
-    Checkbox.checkbox [ Checkbox.isPrimary ] [ str "Primary" ]
-    Checkbox.checkbox [ Checkbox.isInfo ] [ str "Info" ]
-    Checkbox.checkbox [ Checkbox.isSuccess ] [ str "Success" ]
-    Checkbox.checkbox [ Checkbox.isWarning ] [ str "Warning" ]
-    Checkbox.checkbox [ Checkbox.isDanger ] [ str "Danger" ]
+    Switch.switch [ ] [ str "Button" ]
+    Switch.switch [ Switch.isWhite ] [ str "White" ]
+    Switch.switch [ Switch.isLight ] [ str "Light" ]
+    Switch.switch [ Switch.isDark ] [ str "Dark" ]
+    Switch.switch [ Switch.isBlack ] [ str "Black" ]
+    Switch.switch [ Switch.isPrimary ] [ str "Primary" ]
+    Switch.switch [ Switch.isInfo ] [ str "Info" ]
+    Switch.switch [ Switch.isSuccess ] [ str "Success" ]
+    Switch.switch [ Switch.isWarning ] [ str "Warning" ]
+    Switch.switch [ Switch.isDanger ] [ str "Danger" ]
 ```
     """
 
 let sizeCode =
     """
 ```fsharp
-    Checkbox.checkbox [ Checkbox.isSmall ] [ str "Small" ]
-    Checkbox.checkbox [ ] [ str "Normal" ]
-    Checkbox.checkbox [ Checkbox.isMedium ] [ str "Medium" ]
-    Checkbox.checkbox [ Checkbox.isLarge ] [ str "Large" ]
+Switch.switch [ Switch.isSmall ] [ str "Small" ]
+Switch.switch [ ] [ str "Normal" ]
+Switch.switch [ Switch.isMedium ] [ str "Medium" ]
+Switch.switch [ Switch.isLarge ] [ str "Large" ]
 ```
     """
 
@@ -52,32 +52,32 @@ let sizeCode =
 let circleCode =
     """
 ```fsharp
-    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle ] [ str "Checkbox" ]
-    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isPrimary ] [ str "Checkbox" ]
-    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isSuccess ] [ str "Checkbox - success" ]
-    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isWarning ] [ str "Checkbox - warning" ]
-    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isDanger ] [ str "Checkbox - danger" ]
-    Checkbox.checkbox [ Checkbox.isChecked; Checkbox.isCircle; Checkbox.isInfo ] [ str "Checkbox - info" ]
+Switch.switch [ Switch.isChecked; Switch.isCircle ] [ str "Checkbox" ]
+Switch.switch [ Switch.isChecked; Switch.isCircle; Switch.isPrimary ] [ str "Checkbox" ]
+Switch.switch [ Switch.isChecked; Switch.isCircle; Switch.isSuccess ] [ str "Checkbox - success" ]
+Switch.switch [ Switch.isChecked; Switch.isCircle; Switch.isWarning ] [ str "Checkbox - warning" ]
+Switch.switch [ Switch.isChecked; Switch.isCircle; Switch.isDanger ] [ str "Checkbox - danger" ]
+Switch.switch [ Switch.isChecked; Switch.isCircle; Switch.isInfo ] [ str "Checkbox - info" ]
 ```
     """
 
 let mixedStyleCode =
     """
 ```fsharp
-    Button.button [ Button.isInverted ] [ str "Inverted" ]
-    Button.button [ Button.isSuccess; Button.isInverted ] [ str "Inverted" ]
-    Button.button [ Button.isDanger; Button.isInverted; Button.isOutlined ] [ str "Invert Outlined" ]
-    Button.button [ Button.isInfo; Button.isInverted; Button.isOutlined ] [ str "Invert Outlined" ]
+    Switch.switch [ Button.isInverted ] [ str "Inverted" ]
+    Switch.switch [ Button.isSuccess; Button.isInverted ] [ str "Inverted" ]
+    Switch.switch [ Button.isDanger; Button.isInverted; Button.isOutlined ] [ str "Invert Outlined" ]
+    Switch.switch [ Button.isInfo; Button.isInverted; Button.isOutlined ] [ str "Invert Outlined" ]
 ```
     """
 
 let stateCode =
     """
 ```fsharp
-    Checkradio.checkbox [  Checkradio.isDisabled ] [ str "Disabled" ]
-    Checkradio.checkbox [  Checkradio.isDisabled; Checkradio.isChecked ] [ str "Disabled & Checked" ]
-    Checkradio.checkbox [ ] [ str "Unchecked" ]
-    Checkradio.checkbox [ Checkradio.isChecked;] [ str "checked" ]
+    Switch.switch [  Switch.isDisabled ] [ str "Disabled" ]
+    Switch.switch [  Switch.isDisabled; Checkradio.isChecked ] [ str "Disabled & Checked" ]
+    Switch.switch [ ] [ str "Unchecked" ]
+    Switch.switch [ Switch.isChecked;] [ str "checked" ]
 ```
     """
 
@@ -85,10 +85,10 @@ let eventCode =
     """
 ```fsharp
     // For registering a change event, we can use the Checkradio.onChange helper
-    yield! Checkradio.checkbox 
+    yield! Switch.switch 
             [
                 if model.IsChecked then yield Checkradio.isChecked;  
-                yield Checkradio.onChange (fun x -> dispatch (Change state))
+                yield Switch.onChange (fun x -> dispatch (Change state))
             ] 
             [ str  (sprintf "%A" model.IsChecked) ]
 
