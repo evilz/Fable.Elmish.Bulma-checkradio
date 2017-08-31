@@ -4673,7 +4673,7 @@ var Elements = function () {
       return {
         type: "Global.Elements",
         interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-        cases: [["Checkradio"], ["Switch"], ["Slider"]]
+        cases: [["Checkradio"], ["Switch"], ["Slider"], ["Divider"]]
       };
     }
   }, {
@@ -4726,6 +4726,8 @@ function toHash(page) {
       return "#elements/switch";
     } else if (page.data.tag === 2) {
       return "#elements/slider";
+    } else if (page.data.tag === 3) {
+      return "#elements/divider";
     } else {
       return "#elements/checkradio";
     }
@@ -8093,7 +8095,9 @@ var Offset = function (__exports) {
   var isFull_9 = __exports.isFull = new Types$1.Option(1, [new Types$1.IScreen(0), new Types$1.ISize(17)]);
   return __exports;
 }({});
-
+function customClass$1(arg0) {
+  return new Types$1.Option(2, arg0);
+}
 
 function column(options, children) {
   var parseOptions = function parseOptions(result, _arg1) {
@@ -9366,6 +9370,72 @@ var Msg$4 = function () {
 setType("Elements.Slider.Types.Msg", Msg$4);
 
 var Model$5 = function () {
+  function Model(intro, normalViewer, verticalViewer) {
+    babelHelpers.classCallCheck(this, Model);
+    this.Intro = intro;
+    this.NormalViewer = normalViewer;
+    this.VerticalViewer = verticalViewer;
+  }
+
+  babelHelpers.createClass(Model, [{
+    key: _Symbol.reflection,
+    value: function value() {
+      return {
+        type: "Elements.Divider.Types.Model",
+        interfaces: ["FSharpRecord", "System.IEquatable", "System.IComparable"],
+        properties: {
+          Intro: "string",
+          NormalViewer: Model$1,
+          VerticalViewer: Model$1
+        }
+      };
+    }
+  }, {
+    key: "Equals",
+    value: function Equals(other) {
+      return equalsRecords(this, other);
+    }
+  }, {
+    key: "CompareTo",
+    value: function CompareTo(other) {
+      return compareRecords(this, other) | 0;
+    }
+  }]);
+  return Model;
+}();
+setType("Elements.Divider.Types.Model", Model$5);
+var Msg$5 = function () {
+  function Msg(tag, data) {
+    babelHelpers.classCallCheck(this, Msg);
+    this.tag = tag;
+    this.data = data;
+  }
+
+  babelHelpers.createClass(Msg, [{
+    key: _Symbol.reflection,
+    value: function value() {
+      return {
+        type: "Elements.Divider.Types.Msg",
+        interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
+        cases: [["NormalViewerMsg", Msg$1], ["VerticalViewerMsg", Msg$1]]
+      };
+    }
+  }, {
+    key: "Equals",
+    value: function Equals(other) {
+      return this === other || this.tag === other.tag && equals(this.data, other.data);
+    }
+  }, {
+    key: "CompareTo",
+    value: function CompareTo(other) {
+      return compareUnions(this, other) | 0;
+    }
+  }]);
+  return Msg;
+}();
+setType("Elements.Divider.Types.Msg", Msg$5);
+
+var Model$6 = function () {
   function Model(intro) {
     babelHelpers.classCallCheck(this, Model);
     this.Intro = intro;
@@ -9395,7 +9465,7 @@ var Model$5 = function () {
   }]);
   return Model;
 }();
-setType("Home.Types.Model", Model$5);
+setType("Home.Types.Model", Model$6);
 
 var Msg$2 = function () {
   function Msg$$1(tag, data) {
@@ -9410,7 +9480,7 @@ var Msg$2 = function () {
       return {
         type: "App.Types.Msg",
         interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-        cases: [["CheckradioMsg", Msg$3], ["SwitchMsg", Msg], ["SliderMsg", Msg$4]]
+        cases: [["CheckradioMsg", Msg$3], ["SwitchMsg", Msg], ["SliderMsg", Msg$4], ["DividerMsg", Msg$5]]
       };
     }
   }, {
@@ -9428,11 +9498,12 @@ var Msg$2 = function () {
 }();
 setType("App.Types.Msg", Msg$2);
 var ElementsModel = function () {
-  function ElementsModel(checkradio, _switch, slider) {
+  function ElementsModel(checkradio, _switch, slider, divider) {
     babelHelpers.classCallCheck(this, ElementsModel);
     this.Checkradio = checkradio;
     this.Switch = _switch;
     this.Slider = slider;
+    this.Divider = divider;
   }
 
   babelHelpers.createClass(ElementsModel, [{
@@ -9444,7 +9515,8 @@ var ElementsModel = function () {
         properties: {
           Checkradio: Model$3,
           Switch: Model,
-          Slider: Model$4
+          Slider: Model$4,
+          Divider: Model$5
         }
       };
     }
@@ -9478,7 +9550,7 @@ var Model$2 = function () {
         interfaces: ["FSharpRecord", "System.IEquatable", "System.IComparable"],
         properties: {
           CurrentPage: Page,
-          Home: Model$5,
+          Home: Model$6,
           Elements: ElementsModel
         }
       };
@@ -9777,13 +9849,386 @@ function root$3(model, dispatch) {
   }))]));
 }
 
+function CurriedLambda(f, _this, expectedArgsLength) {
+    if (f.curried === true) {
+        return f;
+    }
+    var curriedFn = function curriedFn() {
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        // _this = _this || this;
+        expectedArgsLength = expectedArgsLength || f.length;
+        if (args.length >= expectedArgsLength) {
+            var restArgs = args.splice(expectedArgsLength);
+            var res = f.apply(_this, args);
+            if (typeof res === "function") {
+                var newLambda = CurriedLambda(res, _this);
+                return restArgs.length === 0 ? newLambda : newLambda.apply(_this, restArgs);
+            } else {
+                return res;
+            }
+        } else {
+            return CurriedLambda(function () {
+                for (var _len2 = arguments.length, args2 = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                    args2[_key2] = arguments[_key2];
+                }
+
+                return f.apply(_this, args.concat(args2));
+            }, _this, expectedArgsLength - args.length);
+        }
+    };
+    curriedFn.curried = true;
+    return curriedFn;
+}
+
+var Types$6 = function (__exports) {
+  var ITitleSize = __exports.ITitleSize = function () {
+    function ITitleSize(tag, data) {
+      babelHelpers.classCallCheck(this, ITitleSize);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(ITitleSize, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Heading.Types.ITitleSize",
+          interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
+          cases: [["Is1"], ["Is2"], ["Is3"], ["Is4"], ["Is5"], ["Is6"]]
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return this === other || this.tag === other.tag && equals(this.data, other.data);
+      }
+    }, {
+      key: "CompareTo",
+      value: function CompareTo(other) {
+        return compareUnions(this, other) | 0;
+      }
+    }]);
+    return ITitleSize;
+  }();
+
+  setType("Elmish.Bulma.Elements.Heading.Types.ITitleSize", ITitleSize);
+
+  var ofTitleSize = __exports.ofTitleSize = function (titleSize) {
+    if (titleSize.tag === 1) {
+      return "is-2";
+    } else if (titleSize.tag === 2) {
+      return "is-3";
+    } else if (titleSize.tag === 3) {
+      return "is-4";
+    } else if (titleSize.tag === 4) {
+      return "is-5";
+    } else if (titleSize.tag === 5) {
+      return "is-6";
+    } else {
+      return "is-1";
+    }
+  };
+
+  var Option$$1 = __exports.Option = function () {
+    function Option$$1(tag, data) {
+      babelHelpers.classCallCheck(this, Option$$1);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(Option$$1, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Heading.Types.Option",
+          interfaces: ["FSharpUnion", "System.IEquatable"],
+          cases: [["Size", ITitleSize], ["IsSubtitle"], ["IsSpaced"], ["CustomClass", "string"], ["Props", makeGeneric(List$1, {
+            T: Interface("Fable.Helpers.React.Props.IHTMLProp")
+          })]]
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return this === other || this.tag === other.tag && equals(this.data, other.data);
+      }
+    }]);
+    return Option$$1;
+  }();
+
+  setType("Elmish.Bulma.Elements.Heading.Types.Option", Option$$1);
+
+  var Options = __exports.Options = function () {
+    function Options(titleSize, titleType, isSpaced, customClass, props) {
+      babelHelpers.classCallCheck(this, Options);
+      this.TitleSize = titleSize;
+      this.TitleType = titleType;
+      this.IsSpaced = isSpaced;
+      this.CustomClass = customClass;
+      this.Props = props;
+    }
+
+    babelHelpers.createClass(Options, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Elements.Heading.Types.Options",
+          interfaces: ["FSharpRecord", "System.IEquatable"],
+          properties: {
+            TitleSize: Option("string"),
+            TitleType: "string",
+            IsSpaced: "boolean",
+            CustomClass: Option("string"),
+            Props: makeGeneric(List$1, {
+              T: Interface("Fable.Helpers.React.Props.IHTMLProp")
+            })
+          }
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return equalsRecords(this, other);
+      }
+    }], [{
+      key: "Empty",
+      get: function get() {
+        return new Options(null, "title", false, null, new List$1());
+      }
+    }]);
+    return Options;
+  }();
+
+  setType("Elmish.Bulma.Elements.Heading.Types.Options", Options);
+  return __exports;
+}({});
+var isSubtitle = new Types$6.Option(1);
+var is1 = new Types$6.Option(0, new Types$6.ITitleSize(0));
+var is2 = new Types$6.Option(0, new Types$6.ITitleSize(1));
+var is3 = new Types$6.Option(0, new Types$6.ITitleSize(2));
+var is4 = new Types$6.Option(0, new Types$6.ITitleSize(3));
+var is5 = new Types$6.Option(0, new Types$6.ITitleSize(4));
+var is6 = new Types$6.Option(0, new Types$6.ITitleSize(5));
+var isSpaced = new Types$6.Option(2);
+
+
+function title(element, options, children) {
+  var parseOption = function parseOption(result, opt) {
+    if (opt.tag === 1) {
+      return new Types$6.Options(result.TitleSize, "subtitle", result.IsSpaced, result.CustomClass, result.Props);
+    } else if (opt.tag === 2) {
+      return new Types$6.Options(result.TitleSize, result.TitleType, true, result.CustomClass, result.Props);
+    } else if (opt.tag === 3) {
+      var CustomClass = opt.data;
+      return new Types$6.Options(result.TitleSize, result.TitleType, result.IsSpaced, CustomClass, result.Props);
+    } else if (opt.tag === 4) {
+      return new Types$6.Options(result.TitleSize, result.TitleType, result.IsSpaced, result.CustomClass, opt.data);
+    } else {
+      return new Types$6.Options(Types$6.ofTitleSize(opt.data), result.TitleType, result.IsSpaced, result.CustomClass, result.Props);
+    }
+  };
+
+  var opts = function () {
+    var state = Types$6.Options.Empty;
+    return function (list) {
+      return fold$1(parseOption, state, list);
+    };
+  }()(options);
+
+  var className = classBaseList(join(" ", new List$1(opts.TitleType, map(function (x) {
+    return x;
+  }, filter(function (x_1) {
+    return function () {
+      return x_1 != null;
+    }();
+  }, ofArray([opts.TitleSize, opts.CustomClass]))))), ofArray([["is-spaced", opts.IsSpaced]]));
+  return element(toList(delay(function () {
+    return append$1(singleton$1(className), delay(function () {
+      return opts.Props;
+    }));
+  })), children);
+}
+function h1(options) {
+  var options_1 = new List$1(is1, options);
+  return function (children) {
+    return title(function (b, c) {
+      return react_1.apply(undefined, ["h1", createObj(b, 1)].concat(babelHelpers.toConsumableArray(c)));
+    }, options_1, children);
+  };
+}
+
+
+
+
+
+var p = CurriedLambda(function (options, children) {
+  return title(function (b, c) {
+    return react_1.apply(undefined, ["p", createObj(b, 1)].concat(babelHelpers.toConsumableArray(c)));
+  }, options, children);
+});
+
+var Classes$1 = function (__exports) {
+  var Divider = __exports.Divider = "is-divider";
+  var IsVertical = __exports.IsVertical = "is-divider-vertical";
+  return __exports;
+}({});
+var Types$7 = function (__exports) {
+  var Option$$1 = __exports.Option = function () {
+    function Option$$1(tag, data) {
+      babelHelpers.classCallCheck(this, Option$$1);
+      this.tag = tag;
+      this.data = data;
+    }
+
+    babelHelpers.createClass(Option$$1, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Extensions.Divider.Types.Option",
+          interfaces: ["FSharpUnion", "System.IEquatable"],
+          cases: [["IsVertical"], ["Label", "string"], ["Props", makeGeneric(List$1, {
+            T: Interface("Fable.Helpers.React.Props.IHTMLProp")
+          })], ["CustomClass", "string"]]
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return this === other || this.tag === other.tag && equals(this.data, other.data);
+      }
+    }]);
+    return Option$$1;
+  }();
+
+  setType("Elmish.Bulma.Extensions.Divider.Types.Option", Option$$1);
+
+  var ofStyles = __exports.ofStyles = function (style) {
+    if (style.tag === 0) {
+      return "is-divider-vertical";
+    } else {
+      return {
+        formatFn: fsFormat("%A isn't a valid style value"),
+        input: "%A isn't a valid style value"
+      }.formatFn(function (x) {
+        throw new Error(x);
+      })(style);
+    }
+  };
+
+  var Options = __exports.Options = function () {
+    function Options(isVertical, label, props, customClass) {
+      babelHelpers.classCallCheck(this, Options);
+      this.IsVertical = isVertical;
+      this.Label = label;
+      this.Props = props;
+      this.CustomClass = customClass;
+    }
+
+    babelHelpers.createClass(Options, [{
+      key: _Symbol.reflection,
+      value: function value() {
+        return {
+          type: "Elmish.Bulma.Extensions.Divider.Types.Options",
+          interfaces: ["FSharpRecord", "System.IEquatable"],
+          properties: {
+            IsVertical: "boolean",
+            Label: Option("string"),
+            Props: makeGeneric(List$1, {
+              T: Interface("Fable.Helpers.React.Props.IHTMLProp")
+            }),
+            CustomClass: Option("string")
+          }
+        };
+      }
+    }, {
+      key: "Equals",
+      value: function Equals(other) {
+        return equalsRecords(this, other);
+      }
+    }], [{
+      key: "Empty",
+      get: function get() {
+        return new Options(false, null, new List$1(), null);
+      }
+    }]);
+    return Options;
+  }();
+
+  setType("Elmish.Bulma.Extensions.Divider.Types.Options", Options);
+  return __exports;
+}({});
+var IsVertical_1 = new Types$7.Option(0);
+function label$1(s) {
+  return new Types$7.Option(1, s);
+}
+
+
+
+function divider(options, children) {
+  var parseOptions = function parseOptions(result, opt) {
+    if (opt.tag === 1) {
+      var Label = opt.data;
+      return new Types$7.Options(result.IsVertical, Label, result.Props, result.CustomClass);
+    } else if (opt.tag === 2) {
+      return new Types$7.Options(result.IsVertical, result.Label, opt.data, result.CustomClass);
+    } else if (opt.tag === 3) {
+      var CustomClass = opt.data;
+      return new Types$7.Options(result.IsVertical, result.Label, result.Props, CustomClass);
+    } else {
+      return new Types$7.Options(true, result.Label, result.Props, result.CustomClass);
+    }
+  };
+
+  var opts = function () {
+    var state = Types$7.Options.Empty;
+    return function (list) {
+      return fold$1(parseOptions, state, list);
+    };
+  }()(options);
+
+  return react_1("div", createObj(toList(delay(function () {
+    return append$1(singleton$1(classBaseList("", ofArray([["is-divider", !opts.IsVertical], ["is-divider-vertical", opts.IsVertical], [opts.CustomClass, function () {
+      return opts.CustomClass != null;
+    }()]]))), delay(function () {
+      return append$1(function () {
+        return opts.Label != null;
+      }() ? singleton$1(["data-content", opts.Label]) : empty(), delay(function () {
+        return opts.Props;
+      }));
+    }));
+  })), 1));
+}
+
+var basicInteractive = react_1("div", {}, react_1("div", {
+  className: "has-text-centered"
+}, h1(new List$1())(ofArray(["Top"]))), divider(new List$1(), new List$1()), react_1("div", {
+  className: "has-text-centered"
+}, h1(new List$1())(ofArray(["Middle"]))), divider(ofArray([label$1("OR")]), new List$1()), react_1("div", {
+  className: "has-text-centered"
+}, h1(new List$1())(ofArray(["Bottom"]))));
+var verticalInteractive = columns(new List$1(), ofArray([column(ofArray([customClass$1("has-text-centered")]), ofArray([h1(new List$1())(ofArray(["Left"]))])), column(new List$1(), ofArray([divider(ofArray([label$1("OR"), IsVertical_1]), new List$1())])), column(ofArray([customClass$1("has-text-centered")]), ofArray([h1(new List$1())(ofArray(["Right"]))]))]));
+function root$4(model, dispatch) {
+  return docPage(ofArray([contentFromMarkdown(model.Intro), docSection("### Default divider", root$2(basicInteractive, model.NormalViewer, function ($var1) {
+    return dispatch(function (arg0) {
+      return new Msg$5(0, arg0);
+    }($var1));
+  })), docSection("### Vertical divider", root$2(verticalInteractive, model.VerticalViewer, function ($var2) {
+    return dispatch(function (arg0_1) {
+      return new Msg$5(1, arg0_1);
+    }($var2));
+  }))]));
+}
+
 var Styles$1 = function (__exports) {
   var IsCheckox = __exports.IsCheckox = "is-checkbox";
   var IsRadio = __exports.IsRadio = "is-radio";
   var IsCircle = __exports.IsCircle = "is-circle";
   return __exports;
 }({});
-var Types$6 = function (__exports) {
+var Types$8 = function (__exports) {
   var Option$$1 = __exports.Option = function () {
     function Option$$1(tag, data) {
       babelHelpers.classCallCheck(this, Option$$1);
@@ -9879,66 +10324,66 @@ var Types$6 = function (__exports) {
   setType("Elmish.Bulma.Extensions.Checkradio.Types.Options", Options);
   return __exports;
 }({});
-var isSmall$4 = new Types$6.Option(1, new ISize(0));
-var isMedium$4 = new Types$6.Option(1, new ISize(1));
-var isLarge$4 = new Types$6.Option(1, new ISize(2));
-var isChecked$1 = new Types$6.Option(3, true);
-var isDisabled$2 = new Types$6.Option(4, true);
-var isCircle$1 = new Types$6.Option(2);
-var isBlack$2 = new Types$6.Option(0, new ILevelAndColor(0));
-var isDark$2 = new Types$6.Option(0, new ILevelAndColor(1));
-var isLight$2 = new Types$6.Option(0, new ILevelAndColor(2));
-var isWhite$2 = new Types$6.Option(0, new ILevelAndColor(3));
-var isPrimary$2 = new Types$6.Option(0, new ILevelAndColor(4));
-var isInfo$2 = new Types$6.Option(0, new ILevelAndColor(5));
-var isSuccess$2 = new Types$6.Option(0, new ILevelAndColor(6));
-var isWarning$2 = new Types$6.Option(0, new ILevelAndColor(7));
-var isDanger$2 = new Types$6.Option(0, new ILevelAndColor(8));
+var isSmall$4 = new Types$8.Option(1, new ISize(0));
+var isMedium$4 = new Types$8.Option(1, new ISize(1));
+var isLarge$4 = new Types$8.Option(1, new ISize(2));
+var isChecked$1 = new Types$8.Option(3, true);
+var isDisabled$2 = new Types$8.Option(4, true);
+var isCircle$1 = new Types$8.Option(2);
+var isBlack$2 = new Types$8.Option(0, new ILevelAndColor(0));
+var isDark$2 = new Types$8.Option(0, new ILevelAndColor(1));
+var isLight$2 = new Types$8.Option(0, new ILevelAndColor(2));
+var isWhite$2 = new Types$8.Option(0, new ILevelAndColor(3));
+var isPrimary$2 = new Types$8.Option(0, new ILevelAndColor(4));
+var isInfo$2 = new Types$8.Option(0, new ILevelAndColor(5));
+var isSuccess$2 = new Types$8.Option(0, new ILevelAndColor(6));
+var isWarning$2 = new Types$8.Option(0, new ILevelAndColor(7));
+var isDanger$2 = new Types$8.Option(0, new ILevelAndColor(8));
 
 
 
 function name(customName) {
-  return new Types$6.Option(11, customName);
+  return new Types$8.Option(11, customName);
 }
 
 
-function onChange$2(cb) {
-  return new Types$6.Option(8, cb);
+function onChange$3(cb) {
+  return new Types$8.Option(8, cb);
 }
 function checkbox(options, children) {
   var parseOptions = function parseOptions(result, opt) {
     if (opt.tag === 1) {
       var Size = ofSize(opt.data);
-      return new Types$6.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 2) {
-      return new Types$6.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 3) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, opt.data, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, opt.data, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 4) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, opt.data, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, opt.data, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 5) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 6) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 11) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 7) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, opt.data, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, opt.data, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 9) {
       var CustomClass = opt.data;
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 8) {
       var OnChange = opt.data;
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, OnChange, result.ComponentId);
     } else if (opt.tag === 10) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, opt.data);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, opt.data);
     } else {
-      return new Types$6.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     }
   };
 
   var opts = function () {
-    var state = Types$6.Options.Empty;
+    var state = Types$8.Options.Empty;
     return function (list) {
       return fold$1(parseOptions, state, list);
     };
@@ -9978,36 +10423,36 @@ function radio(options, children) {
   var parseOptions = function parseOptions(result, opt) {
     if (opt.tag === 1) {
       var Size = ofSize(opt.data);
-      return new Types$6.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 2) {
-      return new Types$6.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, true, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 3) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, opt.data, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, opt.data, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 4) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, opt.data, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, opt.data, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 5) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, opt.data, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 6) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, opt.data, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 11) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, opt.data, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 7) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, opt.data, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, opt.data, result.CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 9) {
       var CustomClass = opt.data;
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, CustomClass, result.OnChange, result.ComponentId);
     } else if (opt.tag === 8) {
       var OnChange = opt.data;
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, OnChange, result.ComponentId);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, OnChange, result.ComponentId);
     } else if (opt.tag === 10) {
-      return new Types$6.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, opt.data);
+      return new Types$8.Options(result.Level, result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, opt.data);
     } else {
-      return new Types$6.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
+      return new Types$8.Options(ofLevelAndColor(opt.data), result.Size, result.IsCircle, result.IsChecked, result.IsDisabled, result.Value, result.Label, result.Name, result.Props, result.CustomClass, result.OnChange, result.ComponentId);
     }
   };
 
   var opts = function () {
-    var state = Types$6.Options.Empty;
+    var state = Types$8.Options.Empty;
     return function (list) {
       return fold$1(parseOptions, state, list);
     };
@@ -10100,7 +10545,7 @@ var inlineBlockInteractive$1 = columns(new List$1(), ofArray([column(new List$1(
   }));
 })))))]))]));
 var colorInteractive$2 = columns(new List$1(), ofArray([column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
-  className: "block callout is-primary"
+  className: "block callout is-dark"
 }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
   return append$1(checkbox(ofArray([isChecked$1]), ofArray(["Checkbox"])), delay(function () {
     return append$1(checkbox(ofArray([isChecked$1, isWhite$2]), ofArray(["White"])), delay(function () {
@@ -10124,7 +10569,7 @@ var colorInteractive$2 = columns(new List$1(), ofArray([column(new List$1(), ofA
     }));
   }));
 })))))])), column(new List$1(), ofArray([react_1.apply(undefined, ["div", {
-  className: "block callout is-primary"
+  className: "block callout is-dark"
 }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
   return append$1(radio(ofArray([isChecked$1, name("rad")]), ofArray(["Checkbox"])), delay(function () {
     return append$1(radio(ofArray([isChecked$1, isWhite$2, name("rad")]), ofArray(["White"])), delay(function () {
@@ -10212,7 +10657,7 @@ function eventInteractive$2(model, dispatch) {
   }].concat(babelHelpers.toConsumableArray(toList(delay(function () {
     return append$1(checkbox(toList(delay(function () {
       return append$1(model.IsChecked ? singleton$1(isChecked$1) : empty(), delay(function () {
-        return singleton$1(onChange$2(function (x) {
+        return singleton$1(onChange$3(function (x) {
           dispatch(new Msg$3(6, state));
         }));
       }));
@@ -10224,14 +10669,14 @@ function eventInteractive$2(model, dispatch) {
     })(model.IsChecked)])), delay(function () {
       return append$1(checkbox(toList(delay(function () {
         return append$1(model.IsChecked ? singleton$1(isChecked$1) : empty(), delay(function () {
-          return singleton$1(onChange$2(function (x_1) {
+          return singleton$1(onChange$3(function (x_1) {
             dispatch(new Msg$3(6, state));
           }));
         }));
       })), ofArray([model.IsChecked ? ":p" : ":'("])), delay(function () {
         return checkbox(toList(delay(function () {
           return append$1(model.IsChecked ? singleton$1(isChecked$1) : empty(), delay(function () {
-            return singleton$1(onChange$2(function (x_2) {
+            return singleton$1(onChange$3(function (x_2) {
               dispatch(new Msg$3(6, state));
             }));
           }));
@@ -10244,7 +10689,7 @@ function eventInteractive$2(model, dispatch) {
     }));
   })))));
 }
-function root$4(model, dispatch) {
+function root$5(model, dispatch) {
   return docPage(ofArray([contentFromMarkdown(model.Intro), docSection("### Inline vs Block", root$2(inlineBlockInteractive$1, model.InlineBlockViewer, function ($var1) {
     return dispatch(function (arg0) {
       return new Msg$3(0, arg0);
@@ -10272,7 +10717,7 @@ function root$4(model, dispatch) {
   }))]));
 }
 
-function root$5(model) {
+function root$6(model) {
   return contentFromMarkdown(model.Intro);
 }
 
@@ -10291,7 +10736,7 @@ function navButton(classy, href, faClass, txt) {
 var navButtons = react_1("span", {
   className: "nav-item block"
 }, navButton("github", "https://github.com/evilz/Fable.Elmish.Bulma-checkradio/", "fa-github", "Github"));
-var root$6 = react_1("div", {
+var root$7 = react_1("div", {
   className: "nav"
 }, react_1("div", {
   className: "nav-left"
@@ -10300,40 +10745,6 @@ var root$6 = react_1("div", {
 }, react_1("img", createObj(ofArray([new Props.HTMLAttr(106, "logo.png"), new Props.HTMLAttr(8, "logo"), ["style", {
   marginRight: "10px"
 }]]), 1)), "Fable.Elmish.Bulma-checkradio")), navButtons);
-
-function CurriedLambda(f, _this, expectedArgsLength) {
-    if (f.curried === true) {
-        return f;
-    }
-    var curriedFn = function curriedFn() {
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
-
-        // _this = _this || this;
-        expectedArgsLength = expectedArgsLength || f.length;
-        if (args.length >= expectedArgsLength) {
-            var restArgs = args.splice(expectedArgsLength);
-            var res = f.apply(_this, args);
-            if (typeof res === "function") {
-                var newLambda = CurriedLambda(res, _this);
-                return restArgs.length === 0 ? newLambda : newLambda.apply(_this, restArgs);
-            } else {
-                return res;
-            }
-        } else {
-            return CurriedLambda(function () {
-                for (var _len2 = arguments.length, args2 = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                    args2[_key2] = arguments[_key2];
-                }
-
-                return f.apply(_this, args.concat(args2));
-            }, _this, expectedArgsLength - args.length);
-        }
-    };
-    curriedFn.curried = true;
-    return curriedFn;
-}
 
 var Trampoline = function () {
     createClass$2(Trampoline, null, [{
@@ -25608,8 +26019,30 @@ function update$4(msg, model) {
   }
 }
 
+var normalCode = "\r\n```fsharp\r\ndiv [ ClassName \"has-text-centered\"] [ Heading.h1 [] [str \"Top\"] ]\r\nDivider.divider [] []\r\ndiv [ ClassName \"has-text-centered\"] [ Heading.h1 [] [str \"Middle\"] ]\r\nDivider.divider [Divider.label \"OR\"] []\r\ndiv [ ClassName \"has-text-centered\"] [ Heading.h1 [] [str \"Bottom\"] ]\r\n```\r\n    ";
+var verticalCode = "\r\n```fsharp\r\nColumns.columns [ ]\r\n        [ \r\n            Column.column [ Column.customClass \"has-text-centered\" ] [ Heading.h1 [] [str \"Left\"] ]\r\n            Column.column [ ] [Divider.divider [Divider.label \"OR\"; Divider.IsVertical] []]\r\n            Column.column [ Column.customClass \"has-text-centered\" ] [ Heading.h1 [] [str \"Right\"] ]\r\n        ]\r\n```\r\n    ";
+var intro$3 = "\r\n# Divider\r\n\r\nDisplay a vertical or horizontal divider to segment your design.\r\n\r\n*[bulma-divider documentation](https://wikiki.github.io/bulma-extensions/divider)*\r\n        ";
 function init$5() {
-  return new Model$5("\r\n# Fable.Elmish.Bulma\r\n\r\nProvide a wrapper around [Bulma](http://bulma.io/) for [Elmish](https://fable-elmish.github.io/).\r\n\r\nThis website isn't intended into providing a full documentation of Bulma.\r\n\r\nIt's only serve as a documentation of the wrapper and also test that the wrappers are working as this website is build with Fable.Elmish.Bulma itself.\r\n\r\n---\r\n\r\n## How to install ?\r\n\r\nAdd `Fable.Elmish.Bulma` dependence into your paket files.\r\n\r\n```\r\n// paket.denpendencies\r\nnuget Fable.Elmish.Bulma\r\n\r\n// paket.reference\r\nFable.Elmish.Bulma\r\n```\r\n\r\nRun `paket.exe update` at your project root and then `dotnet restore` on your `*.fsproj` file.\r\n\r\nYou are ready to start using Fable.Elmish.Bulma. You can confirm it by trying to open `Elmish.Bulma` namespace.\r\n\r\n```fsharp\r\nopen Elmish.Bulma\r\n```\r\n\r\n## Architecture\r\n\r\nFable.Elmish.Bulma has been designed to provide the best experience over the Bulma CSS framework.\r\nTo archieve this goal, we assume the user to follow some conventions.\r\n\r\nAlways open the \"global\" module and not the lower module of the hierachie. For example, if you want to use the Button element you should follow this code:\r\n\r\n```fsharp\r\nopen Elmish.Bulma.Elements\r\n\r\nButton.button [ Button.isSmall ]\r\n    [ str \"A button\" ]\r\n```\r\n\r\nEvery function follow the \"React DSL\":\r\n\r\n1. Name of the element\r\n2. List of properties\r\n3. Children\r\n\r\nFable.Elmish.Bulma do not only provide wrappers around Bulma but also intellisense the classes provied.\r\n\r\nFor example, here is how to access the \"is-hidden\" class.\r\n\r\n```fsharp\r\n\r\nopen Elmish.Bulma.BulmaClasses\r\n\r\nBulma.Properties.Visibility.IsHidden\r\n\r\n```\r\n\r\nAll the compoments documented into this website, are available into the library.\r\n\r\n   ");
+  var NormalViewer = init$2(normalCode);
+  var VerticalViewer = init$2(verticalCode);
+  return new Model$5(intro$3, NormalViewer, VerticalViewer);
+}
+function update$5(msg, model) {
+  if (msg.tag === 1) {
+    var patternInput = update$2(msg.data, model.VerticalViewer);
+    return [new Model$5(model.Intro, model.NormalViewer, patternInput[0]), Cmd.map(function (arg0) {
+      return new Msg$5(1, arg0);
+    }, patternInput[1])];
+  } else {
+    var patternInput_1 = update$2(msg.data, model.NormalViewer);
+    return [new Model$5(model.Intro, patternInput_1[0], model.VerticalViewer), Cmd.map(function (arg0_1) {
+      return new Msg$5(0, arg0_1);
+    }, patternInput_1[1])];
+  }
+}
+
+function init$6() {
+  return new Model$6("\r\n# Fable.Elmish.Bulma\r\n\r\nProvide a wrapper around [Bulma](http://bulma.io/) for [Elmish](https://fable-elmish.github.io/).\r\n\r\nThis website isn't intended into providing a full documentation of Bulma.\r\n\r\nIt's only serve as a documentation of the wrapper and also test that the wrappers are working as this website is build with Fable.Elmish.Bulma itself.\r\n\r\n---\r\n\r\n## How to install ?\r\n\r\nAdd `Fable.Elmish.Bulma` dependence into your paket files.\r\n\r\n```\r\n// paket.denpendencies\r\nnuget Fable.Elmish.Bulma\r\n\r\n// paket.reference\r\nFable.Elmish.Bulma\r\n```\r\n\r\nRun `paket.exe update` at your project root and then `dotnet restore` on your `*.fsproj` file.\r\n\r\nYou are ready to start using Fable.Elmish.Bulma. You can confirm it by trying to open `Elmish.Bulma` namespace.\r\n\r\n```fsharp\r\nopen Elmish.Bulma\r\n```\r\n\r\n## Architecture\r\n\r\nFable.Elmish.Bulma has been designed to provide the best experience over the Bulma CSS framework.\r\nTo archieve this goal, we assume the user to follow some conventions.\r\n\r\nAlways open the \"global\" module and not the lower module of the hierachie. For example, if you want to use the Button element you should follow this code:\r\n\r\n```fsharp\r\nopen Elmish.Bulma.Elements\r\n\r\nButton.button [ Button.isSmall ]\r\n    [ str \"A button\" ]\r\n```\r\n\r\nEvery function follow the \"React DSL\":\r\n\r\n1. Name of the element\r\n2. List of properties\r\n3. Children\r\n\r\nFable.Elmish.Bulma do not only provide wrappers around Bulma but also intellisense the classes provied.\r\n\r\nFor example, here is how to access the \"is-hidden\" class.\r\n\r\n```fsharp\r\n\r\nopen Elmish.Bulma.BulmaClasses\r\n\r\nBulma.Properties.Visibility.IsHidden\r\n\r\n```\r\n\r\nAll the compoments documented into this website, are available into the library.\r\n\r\n   ");
 }
 
 var pageParser = function () {
@@ -25631,11 +26064,17 @@ var pageParser = function () {
     return function (state_2) {
       return collect(parseAfter_2, parseBefore_2(state_2));
     };
-  }()), map_1(new Page(0), function (state_3) {
-    return top(state_3);
+  }()), map_1(new Page(1, new Elements(3)), function () {
+    var parseBefore_3 = s("elements");
+    var parseAfter_3 = s("divider");
+    return function (state_3) {
+      return collect(parseAfter_3, parseBefore_3(state_3));
+    };
+  }()), map_1(new Page(0), function (state_4) {
+    return top(state_4);
   })]);
-  return function (state_4) {
-    return oneOf(parsers, state_4);
+  return function (state_5) {
+    return oneOf(parsers, state_5);
   };
 }();
 function urlUpdate(result, model) {
@@ -25647,15 +26086,15 @@ function urlUpdate(result, model) {
   }
 }
 function init(result) {
-  var elements = new ElementsModel(init$1(), init$3(), init$4());
-  var patternInput = urlUpdate(result, new Model$2(new Page(0), init$5(), elements));
+  var elements = new ElementsModel(init$1(), init$3(), init$4(), init$5());
+  var patternInput = urlUpdate(result, new Model$2(new Page(0), init$6(), elements));
   return [patternInput[0], Cmd.batch(ofArray([patternInput[1]]))];
 }
 function update(msg, model) {
   if (msg.tag === 1) {
     var patternInput = update$3(msg.data, model.Elements.Switch);
     return [function () {
-      var Elements$$1 = new ElementsModel(model.Elements.Checkradio, patternInput[0], model.Elements.Slider);
+      var Elements$$1 = new ElementsModel(model.Elements.Checkradio, patternInput[0], model.Elements.Slider, model.Elements.Divider);
       return new Model$2(model.CurrentPage, model.Home, Elements$$1);
     }(), Cmd.map(function (arg0) {
       return new Msg$2(1, arg0);
@@ -25663,19 +26102,27 @@ function update(msg, model) {
   } else if (msg.tag === 2) {
     var patternInput_1 = update$4(msg.data, model.Elements.Slider);
     return [function () {
-      var Elements_1 = new ElementsModel(model.Elements.Checkradio, model.Elements.Switch, patternInput_1[0]);
+      var Elements_1 = new ElementsModel(model.Elements.Checkradio, model.Elements.Switch, patternInput_1[0], model.Elements.Divider);
       return new Model$2(model.CurrentPage, model.Home, Elements_1);
     }(), Cmd.map(function (arg0_1) {
       return new Msg$2(2, arg0_1);
     }, patternInput_1[1])];
-  } else {
-    var patternInput_2 = update$1(msg.data, model.Elements.Checkradio);
+  } else if (msg.tag === 3) {
+    var patternInput_2 = update$5(msg.data, model.Elements.Divider);
     return [function () {
-      var Elements_2 = new ElementsModel(patternInput_2[0], model.Elements.Switch, model.Elements.Slider);
+      var Elements_2 = new ElementsModel(model.Elements.Checkradio, model.Elements.Switch, model.Elements.Slider, patternInput_2[0]);
       return new Model$2(model.CurrentPage, model.Home, Elements_2);
     }(), Cmd.map(function (arg0_2) {
-      return new Msg$2(0, arg0_2);
+      return new Msg$2(3, arg0_2);
     }, patternInput_2[1])];
+  } else {
+    var patternInput_3 = update$1(msg.data, model.Elements.Checkradio);
+    return [function () {
+      var Elements_3 = new ElementsModel(patternInput_3[0], model.Elements.Switch, model.Elements.Slider, model.Elements.Divider);
+      return new Model$2(model.CurrentPage, model.Home, Elements_3);
+    }(), Cmd.map(function (arg0_3) {
+      return new Msg$2(0, arg0_3);
+    }, patternInput_3[1])];
   }
 }
 
@@ -29733,7 +30180,7 @@ var Payload = function () {
   return Payload;
 }();
 setType("Fable.Import.RemoteDev.Payload", Payload);
-var Msg$5 = function () {
+var Msg$6 = function () {
   function Msg(state, action, type, payload) {
     babelHelpers.classCallCheck(this, Msg);
     this.state = state;
@@ -29764,7 +30211,7 @@ var Msg$5 = function () {
   }]);
   return Msg;
 }();
-setType("Fable.Import.RemoteDev.Msg", Msg$5);
+setType("Fable.Import.RemoteDev.Msg", Msg$6);
 
 var Debugger = function (__exports) {
   var ConnectionOptions = __exports.ConnectionOptions = function () {
@@ -29938,7 +30385,7 @@ function menuItem(label$$1, page, currentPage) {
   return react_1("li", {}, react_1("a", createObj(ofArray([classList(ofArray([["is-active", page.Equals(currentPage)]])), new Props.HTMLAttr(51, toHash(page))]), 1), label$$1));
 }
 function menu(currentPage) {
-  return menu$1(new List$1(), ofArray([list(new List$1(), ofArray([menuItem("Home", new Page(0), currentPage)])), label(new List$1(), ofArray(["Elements"])), list(new List$1(), ofArray([menuItem("Checkradio", new Page(1, new Elements(0)), currentPage), menuItem("Switch", new Page(1, new Elements(1)), currentPage), menuItem("Slider", new Page(1, new Elements(2)), currentPage)]))]));
+  return menu$1(new List$1(), ofArray([list(new List$1(), ofArray([menuItem("Home", new Page(0), currentPage)])), label(new List$1(), ofArray(["Elements"])), list(new List$1(), ofArray([menuItem("Checkradio", new Page(1, new Elements(0)), currentPage), menuItem("Switch", new Page(1, new Elements(1)), currentPage), menuItem("Slider", new Page(1, new Elements(2)), currentPage), menuItem("Divider", new Page(1, new Elements(3)), currentPage)]))]));
 }
 var header = react_1("div", {
   className: "hero is-primary"
@@ -29964,15 +30411,21 @@ function root(model, dispatch) {
             return new Msg$2(2, arg0_1);
           }($var2));
         });
-      } else {
-        return root$4(model.Elements.Checkradio, function ($var3) {
+      } else if (_arg1.data.tag === 3) {
+        return root$4(model.Elements.Divider, function ($var3) {
           return dispatch(function (arg0_2) {
-            return new Msg$2(0, arg0_2);
+            return new Msg$2(3, arg0_2);
           }($var3));
+        });
+      } else {
+        return root$5(model.Elements.Checkradio, function ($var4) {
+          return dispatch(function (arg0_3) {
+            return new Msg$2(0, arg0_3);
+          }($var4));
         });
       }
     } else {
-      return root$5(model.Home);
+      return root$6(model.Home);
     }
   };
 
@@ -29980,7 +30433,7 @@ function root(model, dispatch) {
     className: "navbar-bg"
   }, react_1("div", {
     className: "container"
-  }, root$6)), header, react_1("div", {
+  }, root$7)), header, react_1("div", {
     className: "section"
   }, react_1("div", {
     className: "container"
